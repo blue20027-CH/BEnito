@@ -1,4 +1,3 @@
-# screens/vendedor.py - NUEVO
 import flet as ft
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -16,7 +15,6 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
     perfil = usuario.get("perfil") or {}
     nombre_vendedor = perfil.get("nombre", "Vendedor")
 
-    # ── Cargar productos del vendedor ────────────────────────────
     def cargar_productos():
         try:
             resp = supabase.table("productos").select("*").eq(
@@ -26,11 +24,8 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
             return []
 
     productos = cargar_productos()
-    tab_activo = {"v": "productos"}
     grid_ref = ft.Ref[ft.Column]()
-    titulo_ref = ft.Ref[ft.Text]()
 
-    # ── Helpers ──────────────────────────────────────────────────
     def precio_float(p):
         if isinstance(p, (int, float)):
             return float(p)
@@ -41,12 +36,201 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
                    int(p.get("ventas", 0) or 0) for p in productos)
 
     def ventas_semana():
-        return total_ventas() * 0.035  # simulado
+        return total_ventas() * 0.035
 
     def ventas_recientes():
-        return total_ventas() * 0.015  # simulado
+        return total_ventas() * 0.015
 
-    # ── Tarjeta estadística ──────────────────────────────────────
+    def actualizar_grid():
+        if grid_ref.current:
+            grid_ref.current.controls = construir_grid()
+        page.update()
+
+    # ── FORMULARIO ───────────────────────────────────────────────
+    def mostrar_formulario(producto_editar=None):
+        es_edicion = producto_editar is not None
+
+        campo_nombre = ft.TextField(
+            label="Nombre del producto",
+            value=producto_editar.get("nombre", "") if es_edicion else "",
+            border_radius=10,
+            border_color="#DDDDDD",
+            focused_border_color=BRAND,
+        )
+        campo_precio = ft.TextField(
+            label="Precio (USD)",
+            value=str(producto_editar.get("precio", "")) if es_edicion else "",
+            border_radius=10,
+            border_color="#DDDDDD",
+            focused_border_color=BRAND,
+            keyboard_type=ft.KeyboardType.NUMBER,
+        )
+        campo_stock = ft.TextField(
+            label="Stock disponible",
+            value=str(producto_editar.get("stock", "0")) if es_edicion else "0",
+            border_radius=10,
+            border_color="#DDDDDD",
+            focused_border_color=BRAND,
+            keyboard_type=ft.KeyboardType.NUMBER,
+        )
+        campo_descripcion = ft.TextField(
+            label="Descripcion",
+            value=producto_editar.get("descripcion", "") if es_edicion else "",
+            border_radius=10,
+            border_color="#DDDDDD",
+            focused_border_color=BRAND,
+            multiline=True,
+            min_lines=2,
+            max_lines=3,
+        )
+        campo_img = ft.TextField(
+            label="URL de imagen",
+            value=producto_editar.get("img", "") if es_edicion else "",
+            border_radius=10,
+            border_color="#DDDDDD",
+            focused_border_color=BRAND,
+        )
+
+        categorias = [
+            "Artesania", "Joyeria", "Vestir",
+            "Mobiliario", "Instrumentos", "Accesorios", "Alimentos"
+        ]
+        dropdown_categoria = ft.Dropdown(
+            label="Categoria",
+            value=producto_editar.get("categoria", "Artesania") if es_edicion else "Artesania",
+            border_radius=10,
+            border_color="#DDDDDD",
+            focused_border_color=BRAND,
+            options=[ft.dropdown.Option(c) for c in categorias],
+        )
+
+        mensaje_error = ft.Text(
+            value="", visible=False,
+            color="#CC0000", size=12,
+        )
+
+        def cerrar(e=None):
+            page.overlay.clear()
+            page.update()
+
+        def guardar(e):
+            nombre = campo_nombre.value.strip()
+            precio_txt = campo_precio.value.strip()
+            stock_txt = campo_stock.value.strip()
+
+            if not nombre or not precio_txt:
+                mensaje_error.value = "Nombre y precio son obligatorios"
+                mensaje_error.visible = True
+                page.update()
+                return
+
+            try:
+                precio = float(precio_txt)
+                stock = int(stock_txt) if stock_txt else 0
+            except ValueError:
+                mensaje_error.value = "Precio y stock deben ser numeros"
+                mensaje_error.visible = True
+                page.update()
+                return
+
+            datos = {
+                "nombre": nombre,
+                "precio": precio,
+                "stock": stock,
+                "categoria": dropdown_categoria.value,
+                "descripcion": campo_descripcion.value.strip(),
+                "img": campo_img.value.strip(),
+                "creador": nombre_vendedor,
+                "color": "#C4A882",
+            }
+
+            try:
+                if es_edicion:
+                    supabase.table("productos").update(datos).eq(
+                        "id", producto_editar["id"]).execute()
+                else:
+                    supabase.table("productos").insert(datos).execute()
+
+                productos[:] = cargar_productos()
+                actualizar_grid()
+                cerrar()
+
+                page.snack_bar = ft.SnackBar(
+                    content=ft.Text("Producto guardado", color="white"),
+                    bgcolor=BRAND, duration=2000,
+                )
+                page.snack_bar.open = True
+                page.update()
+
+            except Exception as ex:
+                mensaje_error.value = f"Error: {ex}"
+                mensaje_error.visible = True
+                page.update()
+
+        dialogo = ft.AlertDialog(
+            modal=True,
+            title=ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                controls=[
+                    ft.Text(
+                        "Editar producto" if es_edicion else "Nuevo producto",
+                        size=18, weight=ft.FontWeight.BOLD, color=TEXTO
+                    ),
+                    ft.Container(
+                        width=30, height=30,
+                        border_radius=15,
+                        bgcolor=BRAND_LIGHT,
+                        alignment=ft.Alignment(0, 0),
+                        on_click=cerrar,
+                        content=ft.Text("✕", size=14, color=BRAND,
+                                        weight=ft.FontWeight.BOLD)
+                    )
+                ]
+            ),
+            content=ft.Container(
+                width=480,
+                height=420,
+                content=ft.Column(
+                    scroll=ft.ScrollMode.AUTO,
+                    spacing=12,
+                    controls=[
+                        mensaje_error,
+                        campo_nombre,
+                        ft.Row(spacing=12, controls=[
+                            ft.Container(expand=True, content=campo_precio),
+                            ft.Container(expand=True, content=campo_stock),
+                        ]),
+                        dropdown_categoria,
+                        campo_descripcion,
+                        campo_img,
+                    ]
+                )
+            ),
+            actions=[
+                ft.TextButton(
+                    "Cancelar",
+                    style=ft.ButtonStyle(color=MUTED),
+                    on_click=cerrar
+                ),
+                ft.ElevatedButton(
+                    "Guardar",
+                    bgcolor=BRAND, color="white",
+                    style=ft.ButtonStyle(
+                        shape=ft.RoundedRectangleBorder(radius=8),
+                        elevation=0,
+                    ),
+                    on_click=guardar
+                ),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+
+        page.overlay.clear()
+        page.overlay.append(dialogo)
+        dialogo.open = True
+        page.update()
+
+    # ── STAT CARD ────────────────────────────────────────────────
     def stat_card(emoji, titulo, valor, subtitulo, activo=False):
         return ft.Container(
             expand=True,
@@ -83,7 +267,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
             )
         )
 
-    # ── Card de producto ─────────────────────────────────────────
+    # ── PRODUCTO CARD ────────────────────────────────────────────
     def producto_card(p):
         precio = precio_float(p.get("precio", 0))
         stock = p.get("stock", 0) or 0
@@ -97,7 +281,6 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
             content=ft.Row(
                 spacing=0,
                 controls=[
-                    # Imagen
                     ft.Container(
                         width=130, height=110,
                         bgcolor=p.get("color", "#C4A882"),
@@ -112,7 +295,6 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
                             )
                         )
                     ),
-                    # Info
                     ft.Container(
                         expand=True,
                         padding=14,
@@ -131,7 +313,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
                                 ),
                                 ft.Row(spacing=8, controls=[
                                     ft.OutlinedButton(
-                                        "✏ Editar",
+                                        "Editar",
                                         height=32,
                                         style=ft.ButtonStyle(
                                             color=TEXTO,
@@ -139,11 +321,11 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
                                                 radius=8),
                                             side=ft.BorderSide(1, "#CCCCCC")
                                         ),
-                                        on_click=lambda _, pid=p.get("id"):
-                                            print(f"Editar {pid}")
+                                        on_click=lambda _, prod=p:
+                                            mostrar_formulario(prod)
                                     ),
                                     ft.OutlinedButton(
-                                        "🗑 Eliminar",
+                                        "Eliminar",
                                         height=32,
                                         style=ft.ButtonStyle(
                                             color="#CC0000",
@@ -167,6 +349,12 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
             supabase.table("productos").delete().eq("id", pid).execute()
             productos[:] = cargar_productos()
             actualizar_grid()
+            page.snack_bar = ft.SnackBar(
+                content=ft.Text("Producto eliminado", color="white"),
+                bgcolor=BRAND, duration=2000,
+            )
+            page.snack_bar.open = True
+            page.update()
         except Exception as e:
             print("Error eliminando:", e)
 
@@ -180,8 +368,18 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         controls=[
                             ft.Text("📦", size=40),
-                            ft.Text("No tienes productos aún",
+                            ft.Text("No tienes productos aun",
                                     size=16, color=MUTED),
+                            ft.Container(height=12),
+                            ft.ElevatedButton(
+                                "+ Agregar primer producto",
+                                bgcolor=BRAND, color="white",
+                                style=ft.ButtonStyle(
+                                    shape=ft.RoundedRectangleBorder(radius=10),
+                                    elevation=0,
+                                ),
+                                on_click=lambda _: mostrar_formulario()
+                            )
                         ]
                     )
                 )
@@ -189,19 +387,13 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
         filas = []
         fila = []
         for i, p in enumerate(productos):
-            fila.append(ft.Container(expand=True,
-                                     content=producto_card(p)))
+            fila.append(ft.Container(expand=True, content=producto_card(p)))
             if len(fila) == 2 or i == len(productos) - 1:
                 if len(fila) == 1:
                     fila.append(ft.Container(expand=True))
                 filas.append(ft.Row(spacing=16, controls=fila))
                 fila = []
         return filas
-
-    def actualizar_grid():
-        if grid_ref.current:
-            grid_ref.current.controls = construir_grid()
-        page.update()
 
     # ── HEADER ───────────────────────────────────────────────────
     header = ft.Container(
@@ -250,23 +442,20 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
         )
     )
 
-    # ── STATS ────────────────────────────────────────────────────
     stats = ft.Container(
         padding=ft.padding.symmetric(horizontal=24, vertical=16),
         content=ft.Row(
             spacing=16,
             controls=[
-                stat_card("📈", "Esta Semana",
-                          ventas_semana(), "+12.5%"),
-                stat_card("💲", "Reciente",
-                          ventas_recientes(), "Últimas 24hr", activo=True),
+                stat_card("📈", "Esta Semana", ventas_semana(), "+12.5%"),
+                stat_card("💲", "Reciente", ventas_recientes(),
+                          "Ultimas 24hr", activo=True),
                 stat_card("📊", "Total Acumulado",
                           total_ventas(), "Total de ventas"),
             ]
         )
     )
 
-    # ── TABS ─────────────────────────────────────────────────────
     tabs = ft.Container(
         padding=ft.padding.symmetric(horizontal=24, vertical=8),
         content=ft.Row(
@@ -293,13 +482,12 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
                     bgcolor="white",
                     border=ft.border.all(1, "#EEEEEE"),
                     padding=ft.padding.symmetric(horizontal=16, vertical=8),
-                    content=ft.Text("Estadísticas", size=13, color=MUTED)
+                    content=ft.Text("Estadisticas", size=13, color=MUTED)
                 ),
             ]
         )
     )
 
-    # ── CUERPO ───────────────────────────────────────────────────
     cuerpo = ft.Container(
         expand=True,
         padding=ft.padding.symmetric(horizontal=24, vertical=8),
@@ -321,7 +509,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
                                 shape=ft.RoundedRectangleBorder(radius=10),
                                 elevation=0,
                             ),
-                            on_click=lambda _: print("Nuevo producto")
+                            on_click=lambda _: mostrar_formulario()
                         )
                     ]
                 ),

@@ -354,3 +354,4 @@ def show_carrito(page: ft.Page, ir_home, carrito_global):
         )
     )
     page.update()
+    
