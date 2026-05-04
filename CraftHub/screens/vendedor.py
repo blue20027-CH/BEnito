@@ -46,9 +46,15 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
             grid_ref.current.controls = construir_grid()
         page.update()
 
-    # ── FORMULARIO ───────────────────────────────────────────────
     def mostrar_formulario(producto_editar=None):
         es_edicion = producto_editar is not None
+        dialogo_ref = {"obj": None}
+
+        def cerrar(e=None):
+            if dialogo_ref["obj"]:
+                dialogo_ref["obj"].open = False
+            page.overlay.clear()
+            page.update()
 
         campo_nombre = ft.TextField(
             label="Nombre del producto",
@@ -108,10 +114,6 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
             value="", visible=False,
             color="#CC0000", size=12,
         )
-
-        def cerrar(e=None):
-            page.overlay.clear()
-            page.update()
 
         def guardar(e):
             nombre = campo_nombre.value.strip()
@@ -182,7 +184,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
                         bgcolor=BRAND_LIGHT,
                         alignment=ft.Alignment(0, 0),
                         on_click=cerrar,
-                        content=ft.Text("✕", size=14, color=BRAND,
+                        content=ft.Text("x", size=14, color=BRAND,
                                         weight=ft.FontWeight.BOLD)
                     )
                 ]
@@ -225,12 +227,12 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
             actions_alignment=ft.MainAxisAlignment.END,
         )
 
+        dialogo_ref["obj"] = dialogo
         page.overlay.clear()
         page.overlay.append(dialogo)
         dialogo.open = True
         page.update()
 
-    # ── STAT CARD ────────────────────────────────────────────────
     def stat_card(emoji, titulo, valor, subtitulo, activo=False):
         return ft.Container(
             expand=True,
@@ -267,7 +269,6 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
             )
         )
 
-    # ── PRODUCTO CARD ────────────────────────────────────────────
     def producto_card(p):
         precio = precio_float(p.get("precio", 0))
         stock = p.get("stock", 0) or 0
@@ -395,7 +396,6 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario):
                 fila = []
         return filas
 
-    # ── HEADER ───────────────────────────────────────────────────
     header = ft.Container(
         bgcolor=BRAND,
         padding=ft.padding.symmetric(horizontal=24, vertical=14),
