@@ -16,6 +16,8 @@ from screens.personalizar import personalizar
 from screens.home import show_home
 from screens.carrito import show_carrito
 from screens.vendedor import show_vendedor
+from screens.pago import show_pago
+from screens.perfil import show_perfil
 
 
 def main(page: ft.Page):
@@ -30,7 +32,12 @@ def main(page: ft.Page):
     usuario_global = {"user": None, "perfil": None}
 
     def ir_bienvenida():
-        show_bienvenida(page, ir_login=ir_login)
+        show_bienvenida(
+            page,
+            ir_login=ir_login,
+            ir_explorar=ir_home_visitante,
+            ir_registro=ir_registro,
+        )
 
     def ir_login():
         show_login(
@@ -62,9 +69,15 @@ def main(page: ft.Page):
             ir_carrito=ir_carrito,
             carrito_global=carrito_global,
             usuario=usuario_global,
+            ir_perfil=ir_perfil,
         )
 
     def ir_home_comprador_sin_args():
+        ir_home_comprador()
+
+    def ir_home_visitante():
+        usuario_global["user"] = None
+        usuario_global["perfil"] = None
         ir_home_comprador()
 
     def ir_home_vendedor(user=None, perfil=None):
@@ -75,6 +88,23 @@ def main(page: ft.Page):
             page,
             ir_bienvenida=ir_bienvenida,
             usuario=usuario_global,
+            ir_perfil=ir_perfil,
+        )
+
+    def ir_perfil():
+        show_perfil(
+            page,
+            ir_home=ir_home_comprador_sin_args,
+            ir_bienvenida=ir_bienvenida,
+            usuario=usuario_global,
+        )
+
+    def ir_pago():
+        show_pago(
+            page,
+            ir_home=ir_home_comprador_sin_args,
+            carrito_global=carrito_global,
+            usuario=usuario_global,
         )
 
     def ir_carrito():
@@ -82,9 +112,11 @@ def main(page: ft.Page):
             page,
             ir_home=ir_home_comprador_sin_args,
             carrito_global=carrito_global,
+            ir_pago=ir_pago,
+            usuario=usuario_global,
         )
 
     ir_bienvenida()
 
 
-ft.app(target=main)
+ft.app(main, assets_dir="assets")

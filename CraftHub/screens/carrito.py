@@ -1,6 +1,9 @@
 import flet as ft
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from supabase_client import supabase
+from screens.envio import calcular_envio
+from screens.componentes import craft_banner_header
 
 BRAND = "#800000"
 BRAND_LIGHT = "#F5E8E8"
@@ -8,8 +11,19 @@ TEXTO = "#1A1A1A"
 MUTED = "#888888"
 
 
-def show_carrito(page: ft.Page, ir_home, carrito_global):
+def show_carrito(page: ft.Page, ir_home, carrito_global, ir_pago=None, usuario=None):
     page.clean()
+    perfil = (usuario or {}).get("perfil") or {}
+
+    def ubicacion_vendedor(nombre):
+        try:
+            resp = supabase.table("perfiles").select("ubicacion").eq(
+                "nombre", nombre).execute()
+            if resp.data:
+                return resp.data[0].get("ubicacion")
+        except Exception as ex:
+            print("Error buscando ubicacion del vendedor:", ex)
+        return None
 
     def precio_float(p):
         if isinstance(p, (int, float)):
@@ -63,7 +77,11 @@ def show_carrito(page: ft.Page, ir_home, carrito_global):
             for i in range(len(carrito_global))
             if carrito_global[i] is not None
         )
-        envio = 10.0 if subtotal > 0 else 0.0
+        envio, _ = calcular_envio(
+            carrito_global,
+            perfil.get("ubicacion", "Panama"),
+            ubicacion_vendedor,
+        ) if subtotal > 0 else (0.0, [])
         return subtotal, envio, subtotal + envio
 
     def actualizar_resumen():
@@ -79,7 +97,24 @@ def show_carrito(page: ft.Page, ir_home, carrito_global):
         actualizar_resumen()
 
     def cambiar_cantidad(idx, delta):
+        producto = carrito_global[idx]
+        if producto is None:
+            return
+        stock_disponible = int(producto.get("stock", 0) or 0)
         nueva = cantidades[idx]["cantidad"] + delta
+        
+        if delta > 0 and nueva > stock_disponible:
+            page.snack_bar = ft.SnackBar(
+                content=ft.Text(
+                    f"Solo hay {stock_disponible} unidades disponibles.",
+                    color="white"
+                ),
+                bgcolor=BRAND, duration=2000,
+            )
+            page.snack_bar.open = True
+            page.update()
+            return
+            
         if nueva >= 1:
             cantidades[idx]["cantidad"] = nueva
         if lista_ref.current:
@@ -235,6 +270,7 @@ def show_carrito(page: ft.Page, ir_home, carrito_global):
             ft.Container(height=20),
             ft.ElevatedButton(
                 "Realizar compra",
+                on_click=lambda _: ir_pago() if ir_pago else mostrar_confirmacion(),
                 width=float("inf"),
                 height=50,
                 bgcolor=BRAND,
@@ -243,40 +279,23 @@ def show_carrito(page: ft.Page, ir_home, carrito_global):
                     shape=ft.RoundedRectangleBorder(radius=10),
                     elevation=0,
                 ),
-                on_click=lambda _: mostrar_confirmacion()
+                
             )
         ]
 
     subtotal, envio, total = calcular_total()
     items_count = sum(1 for p in carrito_global if p is not None)
 
-    header = ft.Container(
-        bgcolor=BRAND,
-        padding=ft.padding.symmetric(horizontal=24, vertical=14),
-        content=ft.Row(
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-            controls=[
-                ft.Row(spacing=10, controls=[
-                    ft.Container(
-                        width=36, height=36,
-                        border_radius=6,
-                        bgcolor="white",
-                        alignment=ft.Alignment(0, 0),
-                        content=ft.Text("CH", color=BRAND, size=14,
-                                        weight=ft.FontWeight.BOLD)
-                    ),
-                    ft.Text("CRAFTHUB", size=14,
-                            weight=ft.FontWeight.BOLD, color="white"),
-                ]),
-                ft.Row(spacing=8, controls=[
-                    ft.TextButton(
-                        "<- Volver",
-                        style=ft.ButtonStyle(color="white"),
-                        on_click=lambda _: ir_home()
-                    )
-                ])
-            ]
-        )
+    header = craft_banner_header(
+        "CRAFTHUB",
+        "Carrito de compras",
+        actions=[
+            ft.TextButton(
+                "<- Volver",
+                style=ft.ButtonStyle(color="white"),
+                on_click=lambda _: ir_home()
+            )
+        ],
     )
 
     tabs = ft.Container(

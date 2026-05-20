@@ -2,6 +2,7 @@ import flet as ft
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from supabase_client import supabase
+from screens.componentes import craft_logo
 
 BRAND = "#800000"
 BRAND_LIGHT = "#F5E8E8"
@@ -10,15 +11,7 @@ MUTED = "#888888"
 
 
 def logo(size=40):
-    return ft.Container(
-        width=size, height=size,
-        border_radius=8,
-        bgcolor=BRAND,
-        alignment=ft.Alignment(0, 0),
-        content=ft.Text("CH", color="white",
-                        size=int(size // 2.2),
-                        weight=ft.FontWeight.BOLD)
-    )
+    return craft_logo(size)
 
 
 def separador(h=20):
@@ -28,17 +21,35 @@ def separador(h=20):
 def lado_marca(titulo_txt, subtitulo_txt):
     return ft.Container(
         width=380,
-        bgcolor=BRAND,
-        padding=50,
-        content=ft.Column(
-            alignment=ft.MainAxisAlignment.CENTER,
-            spacing=12,
+        clip_behavior=ft.ClipBehavior.HARD_EDGE,
+        content=ft.Stack(
             controls=[
-                logo(60),
-                separador(24),
-                ft.Text(titulo_txt, size=38,
-                        weight=ft.FontWeight.BOLD, color="white"),
-                ft.Text(subtitulo_txt, size=15, color="#FFB3B3"),
+                ft.Container(
+                    width=380,
+                    expand=True,
+                    alignment=ft.Alignment(0, -1),
+                    content=ft.Image(
+                        src="banner.png",
+                        fit="cover",
+                        width=380,
+                        height=float("inf"),
+                    )
+                ),
+                ft.Container(bgcolor="#00000066"),
+                ft.Container(
+                    padding=50,
+                    content=ft.Column(
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        spacing=12,
+                        controls=[
+                            logo(60),
+                            separador(24),
+                            ft.Text(titulo_txt, size=38,
+                                    weight=ft.FontWeight.BOLD, color="white"),
+                            ft.Text(subtitulo_txt, size=15, color="#FFDCDC"),
+                        ]
+                    )
+                )
             ]
         )
     )
