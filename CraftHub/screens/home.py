@@ -511,15 +511,6 @@ def show_home(page: ft.Page, ir_bienvenida, ir_carrito=None, carrito_global=None
                 fila_actual = []
         return filas
 
-        filas = []
-        fila_actual = []
-        for i, p in enumerate(lista):
-            fila_actual.append(producto_card(p))
-            if len(fila_actual) == 4 or i == len(lista) - 1:
-                filas.append(ft.Row(spacing=20, controls=fila_actual))
-                fila_actual = []
-        return filas
-
     def actualizar_grid():
         if contenedor_grid.current:
             contenedor_grid.current.controls = construir_grid(

@@ -49,10 +49,18 @@ def show_bienvenida(page: ft.Page, ir_login, ir_explorar=None, ir_registro=None)
                                                         weight=ft.FontWeight.BOLD),
                                             ]),
                                             ft.Row(spacing=44, controls=[
-                                                ft.Text("Inicio", size=14, color="white",
-                                                        weight=ft.FontWeight.W_600),
-                                                ft.Text("Explorar", size=14, color="white",
-                                                        weight=ft.FontWeight.W_600),
+                                                ft.Container(
+                                                    on_click=lambda _: show_bienvenida(
+                                                        page, ir_login, ir_explorar, ir_registro
+                                                    ),
+                                                    content=ft.Text("Inicio", size=14, color="white",
+                                                                    weight=ft.FontWeight.W_600),
+                                                ),
+                                                ft.Container(
+                                                    on_click=lambda _: ir_explorar() if ir_explorar else ir_login(),
+                                                    content=ft.Text("Explorar", size=14, color="white",
+                                                                    weight=ft.FontWeight.W_600),
+                                                ),
                                                 ft.Text("Contacto", size=14, color="white",
                                                         weight=ft.FontWeight.W_600),
                                             ]),

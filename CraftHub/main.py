@@ -10,6 +10,7 @@ if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
 
 import flet as ft
 from screens.bienvenida import show_bienvenida
+from screens.seleccion_rol import show_seleccion_rol
 from screens.login import show_login
 from screens.registro import registro
 from screens.personalizar import personalizar
@@ -35,8 +36,16 @@ def main(page: ft.Page):
         show_bienvenida(
             page,
             ir_login=ir_login,
-            ir_explorar=ir_home_visitante,
+            ir_explorar=ir_seleccion_rol,
             ir_registro=ir_registro,
+        )
+
+    def ir_seleccion_rol():
+        show_seleccion_rol(
+            page,
+            ir_bienvenida=ir_bienvenida,
+            ir_comprador=ir_home_visitante,
+            ir_vendedor=ir_login,
         )
 
     def ir_login():

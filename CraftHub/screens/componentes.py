@@ -1,6 +1,24 @@
 import flet as ft
 
 
+def tabler_icon(name, size=24, color=None, on_click=None):
+    icon = ft.Image(
+        src=f"icons/{name}.svg",
+        width=size,
+        height=size,
+        fit="contain",
+    )
+    if color:
+        icon.color = color
+    return ft.Container(
+        width=size,
+        height=size,
+        alignment=ft.Alignment(0, 0),
+        on_click=on_click,
+        content=icon,
+    )
+
+
 def craft_logo(size=40, on_click=None, bgcolor=None, radius=0):
     return ft.Container(
         width=size,
