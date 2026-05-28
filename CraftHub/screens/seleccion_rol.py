@@ -11,19 +11,28 @@ MUTED = "#F6F6F6"
 BUTTON_GRAY = "#8F8F8F"
 SCALE = 1.42
 CANVAS_W = int(879 * SCALE)
-CANVAS_H = int(518 * SCALE)
-HEADER_H = int(58 * SCALE)
+CANVAS_H = int(600 * SCALE)
+HEADER_H = int(48 * SCALE)
 
 
 def s(value):
     return int(value * SCALE)
 
 
-def show_seleccion_rol(page: ft.Page, ir_bienvenida, ir_comprador, ir_vendedor):
+def show_seleccion_rol(
+    page: ft.Page,
+    ir_bienvenida,
+    ir_comprador,
+    ir_vendedor,
+    ir_login_comprador=None,
+    ir_registro_comprador=None,
+):
     page.clean()
+    page.appbar = None
     page.window_width = 1280
     page.window_height = 800
     page.padding = 0
+    page.spacing = 0
     page.bgcolor = "white"
 
     def pill_button(texto, accion, bgcolor=BUTTON_GRAY, width=212, outlined=False):
@@ -37,18 +46,18 @@ def show_seleccion_rol(page: ft.Page, ir_bienvenida, ir_comprador, ir_vendedor):
             on_click=accion,
             content=ft.Text(
                 texto,
-                size=s(16),
+                size=s(13),
                 color="white",
                 weight=ft.FontWeight.BOLD,
             ),
         )
 
-    def rol_card(left, icono, titulo, texto, acciones):
+    def rol_card(left, icono, titulo, texto, acciones, botones_top=390):
         return ft.Container(
             left=s(left),
-            top=s(82),
+            top=s(20),
             width=s(355),
-            height=s(400),
+            height=s(450),
             border_radius=s(26),
             bgcolor="black",
             border=ft.border.all(1, "black"),
@@ -71,33 +80,34 @@ def show_seleccion_rol(page: ft.Page, ir_bienvenida, ir_comprador, ir_vendedor):
                     ),
                     ft.Container(
                         left=s(31),
-                        top=s(186),
+                        top=s(184),
                         width=s(292),
-                        content=ft.Column(
-                            spacing=s(8),
-                            controls=[
-                                ft.Text(
-                                    titulo,
-                                    size=s(24),
-                                    color="white",
-                                    weight=ft.FontWeight.BOLD,
-                                ),
-                                ft.Text(
-                                    texto,
-                                    size=s(15),
-                                    color=MUTED,
-                                    height=1.28,
-                                ),
-                            ],
+                        content=ft.Text(
+                            titulo,
+                            size=s(24),
+                            color="white",
+                            weight=ft.FontWeight.BOLD,
+                        ),
+                    ),
+                    ft.Container(
+                        left=s(31),
+                        top=s(230),
+                        width=s(292),
+                        height=s(100),
+                        content=ft.Text(
+                            texto,
+                            size=s(13),
+                            color="white",
+                            height=1.25,
                         ),
                     ),
                     ft.Container(
                         left=0,
-                        top=s(304),
+                        top=s(botones_top),
                         width=s(355),
                         alignment=ft.Alignment(0, 0),
                         content=ft.Column(
-                            spacing=s(12),
+                            spacing=s(10),
                             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                             controls=acciones,
                         ),
@@ -107,46 +117,42 @@ def show_seleccion_rol(page: ft.Page, ir_bienvenida, ir_comprador, ir_vendedor):
         )
 
     header = ft.Container(
-        left=0,
-        top=0,
-        width=CANVAS_W,
-        height=HEADER_H,
+        width=float("inf"),
+        height=s(48),
         bgcolor="white",
         border=ft.border.only(bottom=ft.BorderSide(1, "#D8D8D8")),
-        content=ft.Stack(
+        content=ft.Row(
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=0,
             controls=[
                 ft.Container(
-                    left=s(20),
-                    top=s(19),
                     width=s(24),
                     height=s(24),
                     alignment=ft.Alignment(0, 0),
                     on_click=lambda _: ir_bienvenida(),
                     content=tabler_icon("arrow-left", size=s(22)),
+                    margin=ft.margin.only(left=s(20)),
                 ),
                 ft.Container(
-                    left=0,
-                    top=s(18),
-                    width=CANVAS_W,
+                    expand=True,
                     alignment=ft.Alignment(0, 0),
                     content=ft.Text(
-                        "Identify your user role",
-                        size=s(20),
+                        "Elige tu rol de usuario",
+                        size=s(15),
                         color=TEXTO,
-                        weight=ft.FontWeight.BOLD,
+                        weight=ft.FontWeight.W_500,
                     ),
                 ),
                 ft.Container(
-                    left=s(779),
-                    top=s(15),
+                    margin=ft.margin.only(right=s(20)),
                     content=ft.Row(
                         spacing=s(5),
                         vertical_alignment=ft.CrossAxisAlignment.CENTER,
                         controls=[
-                            craft_logo(s(33)),
+                            craft_logo(s(28)),
                             ft.Text(
                                 "CRAFTHUB",
-                                size=s(9),
+                                size=s(12),
                                 color=TEXTO,
                                 weight=ft.FontWeight.BOLD,
                             ),
@@ -158,41 +164,51 @@ def show_seleccion_rol(page: ft.Page, ir_bienvenida, ir_comprador, ir_vendedor):
     )
 
     page.add(
-        ft.Container(
+        ft.Column(
+            spacing=0,
             expand=True,
-            bgcolor="white",
-            alignment=ft.Alignment(0, 0),
-            content=ft.Container(
-                width=CANVAS_W,
-                height=CANVAS_H,
-                bgcolor="white",
-                content=ft.Stack(
-                    controls=[
-                        header,
-                        rol_card(
-                            77,
-                            "building-store",
-                            "VENDEDOR",
-                            "Do you want more than just a product a story? Discover handmade creations crafted with passion on CraftHub.",
-                            [
-                                ft.Container(height=s(45)),
-                                pill_button("Register", lambda _: ir_vendedor()),
+            controls=[
+                header,
+                ft.Container(
+                    expand=True,
+                    bgcolor="white",
+                    alignment=ft.Alignment(0, 0),
+                    content=ft.Container(
+                        width=CANVAS_W,
+                        height=CANVAS_H,
+                        bgcolor="white",
+                        content=ft.Stack(
+                            controls=[
+                                rol_card(
+                                    60,
+                                    "building-store",
+                                    "VENDEDOR",
+                                    "Convierte lo que amas crear en una oportunidad. Publica tus productos, recibe pedidos y haz crecer tu taller en CraftHub.",
+                                    [
+                                        pill_button("Iniciar sesion", lambda _: ir_vendedor()),
+                                    ],
+                                    botones_top=360,
+                                ),
+                                rol_card(
+                                    500,
+                                    "shopping-bag",
+                                    "COMPRADOR",
+                                    "Explora artesanias panamenas hechas con pasion. Descubre historias, productos unicos y compra cuando quieras.",
+                                    [
+                                        pill_button("Explorar", lambda _: ir_comprador(), outlined=True),
+                                        pill_button(
+                                            "Iniciar sesion",
+                                            lambda _: ir_login_comprador() if ir_login_comprador else ir_comprador(),
+                                        ),
+                                    ],
+                                    botones_top=344,
+                                ),
                             ],
+                            clip_behavior=ft.ClipBehavior.HARD_EDGE,
                         ),
-                        rol_card(
-                            468,
-                            "shopping-bag",
-                            "COMPRADOR",
-                            "Do you want more than just a product a story? Discover handmade creations crafted with passion on CraftHub.",
-                            [
-                                pill_button("Explore", lambda _: ir_comprador(), outlined=True),
-                                pill_button("Register", lambda _: ir_vendedor()),
-                            ],
-                        ),
-                    ],
-                    clip_behavior=ft.ClipBehavior.HARD_EDGE,
+                    ),
                 ),
-            ),
+            ],
         )
     )
     page.update()

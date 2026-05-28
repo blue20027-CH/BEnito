@@ -5,6 +5,9 @@ from supabase_client import supabase
 from screens.menu_perfil import abrir_menu_perfil
 from screens.componentes import craft_logo
 from datetime import datetime, timezone, timedelta
+import threading
+import tkinter as tk
+from tkinter import filedialog
 
 BRAND = "#941515"
 BRAND_DARK = "#760F0F"
@@ -116,7 +119,6 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
         productos = cargar_productos()
         cambiar_tab(tab_activo["v"])
 
-    # ── NOTIFICACIONES ───────────────────────────────────────────
     def cargar_notificaciones():
         user = usuario.get("user")
         if not user:
@@ -146,111 +148,80 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
 
         def noti_card(n):
             return ft.Container(
-                bgcolor="white",
-                border_radius=16,
-                border=ft.border.all(1, BORDER),
-                padding=0,
+                bgcolor="white", border_radius=16,
+                border=ft.border.all(1, BORDER), padding=0,
                 clip_behavior=ft.ClipBehavior.HARD_EDGE,
                 shadow=ft.BoxShadow(blur_radius=10, color="#0000001A",
                                     offset=ft.Offset(0, 4)),
-                content=ft.Column(
-                    spacing=0,
-                    controls=[
-                        ft.Container(
-                            bgcolor=BRAND_LIGHT,
-                            padding=ft.padding.symmetric(
-                                horizontal=18, vertical=14),
-                            content=ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                controls=[
-                                    ft.Row(spacing=10, controls=[
-                                        ft.Container(
-                                            width=36, height=36,
-                                            border_radius=8,
-                                            bgcolor=BRAND,
-                                            alignment=ft.Alignment(0, 0),
-                                            content=ft.Text(
-                                                "CH", color="white",
-                                                size=12,
-                                                weight=ft.FontWeight.BOLD)
-                                        ),
-                                        ft.Text("CRAFTHUB", size=13,
-                                                color=TEXTO,
-                                                weight=ft.FontWeight.BOLD),
-                                    ]),
-                                    ft.Text(
-                                        (n.get("created_at") or "")[:10],
-                                        size=11, color=MUTED
-                                    ),
-                                ]
-                            )
-                        ),
-                        ft.Container(
-                            padding=20,
-                            content=ft.Column(
-                                spacing=12,
-                                controls=[
-                                    ft.Row(spacing=16, controls=[
-                                        ft.Container(
-                                            width=70, height=70,
-                                            border_radius=35,
-                                            bgcolor=BRAND,
-                                            alignment=ft.Alignment(0, 0),
-                                            content=ft.Text("💰", size=32)
-                                        ),
-                                        ft.Column(spacing=4, controls=[
-                                            ft.Row(spacing=8, controls=[
-                                                ft.Text(
-                                                    n.get("titulo", "Nueva venta"),
-                                                    size=18,
-                                                    weight=ft.FontWeight.BOLD,
-                                                    color=TEXTO
-                                                ),
-                                                ft.Text("📢", size=16),
-                                            ]),
-                                            ft.Text(
-                                                n.get("mensaje", ""),
-                                                size=13, color=MUTED
-                                            ),
-                                        ])
-                                    ]),
+                content=ft.Column(spacing=0, controls=[
+                    ft.Container(
+                        bgcolor=BRAND_LIGHT,
+                        padding=ft.padding.symmetric(horizontal=18, vertical=14),
+                        content=ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.Row(spacing=10, controls=[
                                     ft.Container(
-                                        height=48,
-                                        border_radius=10,
-                                        bgcolor=BRAND,
-                                        alignment=ft.Alignment(0, 0),
-                                        on_click=lambda _, nid=n.get("id"): (
-                                            marcar_leida(nid),
-                                            cerrar(),
-                                            cambiar_tab("pedidos")
-                                        ),
-                                        content=ft.Row(
-                                            alignment=ft.MainAxisAlignment.CENTER,
-                                            spacing=8,
-                                            controls=[
-                                                ft.Text(
-                                                    "Ver producto pendiente",
-                                                    color="white", size=14,
-                                                    weight=ft.FontWeight.BOLD),
-                                                ft.Text("›", color="white",
-                                                        size=20),
-                                            ]
-                                        )
-                                    )
-                                ]
-                            )
+                                        width=36, height=36, border_radius=8,
+                                        bgcolor=BRAND, alignment=ft.Alignment(0, 0),
+                                        content=ft.Text("CH", color="white", size=12,
+                                                        weight=ft.FontWeight.BOLD)
+                                    ),
+                                    ft.Text("CRAFTHUB", size=13, color=TEXTO,
+                                            weight=ft.FontWeight.BOLD),
+                                ]),
+                                ft.Text((n.get("created_at") or "")[:10],
+                                        size=11, color=MUTED),
+                            ]
                         )
-                    ]
-                )
+                    ),
+                    ft.Container(
+                        padding=20,
+                        content=ft.Column(spacing=12, controls=[
+                            ft.Row(spacing=16, controls=[
+                                ft.Container(
+                                    width=70, height=70, border_radius=35,
+                                    bgcolor=BRAND, alignment=ft.Alignment(0, 0),
+                                    content=ft.Text("💰", size=32)
+                                ),
+                                ft.Column(spacing=4, controls=[
+                                    ft.Row(spacing=8, controls=[
+                                        ft.Text(n.get("titulo", "Nueva venta"),
+                                                size=18, weight=ft.FontWeight.BOLD,
+                                                color=TEXTO),
+                                        ft.Text("📢", size=16),
+                                    ]),
+                                    ft.Text(n.get("mensaje", ""), size=13, color=MUTED),
+                                ])
+                            ]),
+                            ft.Container(
+                                height=48, border_radius=10, bgcolor=BRAND,
+                                alignment=ft.Alignment(0, 0),
+                                on_click=lambda _, nid=n.get("id"): (
+                                    marcar_leida(nid), cerrar(),
+                                    cambiar_tab("pedidos")
+                                ),
+                                content=ft.Row(
+                                    alignment=ft.MainAxisAlignment.CENTER,
+                                    spacing=8,
+                                    controls=[
+                                        ft.Text("Ver producto pendiente",
+                                                color="white", size=14,
+                                                weight=ft.FontWeight.BOLD),
+                                        ft.Text("›", color="white", size=20),
+                                    ]
+                                )
+                            )
+                        ])
+                    )
+                ])
             )
 
         contenido = ft.Column(
-            scroll=ft.ScrollMode.AUTO,
-            spacing=16,
+            scroll=ft.ScrollMode.AUTO, spacing=16,
             controls=[noti_card(n) for n in notis] if notis else [
                 ft.Container(
-                    padding=60,
-                    alignment=ft.Alignment(0, 0),
+                    padding=60, alignment=ft.Alignment(0, 0),
                     content=ft.Column(
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         controls=[
@@ -266,44 +237,33 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
         page.overlay.clear()
         page.overlay.append(
             ft.Container(
-                expand=True,
-                bgcolor="#00000066",
-                alignment=ft.Alignment(0, 0),
-                on_click=cerrar,
+                expand=True, bgcolor="#00000066",
+                alignment=ft.Alignment(0, 0), on_click=cerrar,
                 content=ft.Container(
-                    width=520,
-                    bgcolor="#F5EDED",
-                    border_radius=20,
-                    padding=24,
-                    content=ft.Column(
-                        spacing=16,
-                        controls=[
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                controls=[
-                                    ft.Text("Notificaciones", size=20,
-                                            weight=ft.FontWeight.BOLD,
-                                            color=TEXTO),
-                                    ft.Container(
-                                        width=32, height=32,
-                                        border_radius=16,
-                                        bgcolor=BRAND_LIGHT,
-                                        alignment=ft.Alignment(0, 0),
-                                        on_click=cerrar,
-                                        content=ft.Text("x", color=BRAND,
-                                                        weight=ft.FontWeight.BOLD)
-                                    )
-                                ]
-                            ),
-                            contenido,
-                        ]
-                    )
+                    width=520, bgcolor="#F5EDED", border_radius=20, padding=24,
+                    content=ft.Column(spacing=16, controls=[
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.Text("Notificaciones", size=20,
+                                        weight=ft.FontWeight.BOLD, color=TEXTO),
+                                ft.Container(
+                                    width=32, height=32, border_radius=16,
+                                    bgcolor=BRAND_LIGHT, alignment=ft.Alignment(0, 0),
+                                    on_click=cerrar,
+                                    content=ft.Text("x", color=BRAND,
+                                                    weight=ft.FontWeight.BOLD)
+                                )
+                            ]
+                        ),
+                        contenido,
+                    ])
                 )
             )
         )
         page.update()
 
-    # ── FORMULARIO ───────────────────────────────────────────────
+    # ── FORMULARIO CON UPLOAD E IMAGEN DE CAMARA ─────────────────
     def mostrar_formulario(producto_editar=None):
         es_edicion = producto_editar is not None
 
@@ -332,6 +292,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
             label="URL de imagen",
             value=producto_editar.get("img", "") if es_edicion else "",
             border_radius=10, focused_border_color=BRAND,
+            hint_text="Pega una URL o usa los botones de abajo",
         )
         campo_descripcion = ft.TextField(
             label="Descripcion",
@@ -348,6 +309,174 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
             border_radius=10, focused_border_color=BRAND,
         )
         error = ft.Text("", color="#B00020", size=12, visible=False)
+        upload_status = ft.Text("", color=BRAND, size=12, visible=False)
+
+        img_preview = ft.Container(
+            width=80, height=80, border_radius=10,
+            bgcolor="#F0F0F0", border=ft.border.all(1, BORDER),
+            alignment=ft.Alignment(0, 0),
+            content=ft.Text("🖼️", size=28),
+        )
+
+        def actualizar_preview(url):
+            if url and url.startswith("http"):
+                img_preview.content = ft.Image(
+                    src=url, fit="cover", width=80, height=80)
+            else:
+                img_preview.content = ft.Text("🖼️", size=28)
+            page.update()
+
+        def on_url_change(e):
+            actualizar_preview(e.control.value)
+
+        campo_img.on_change = on_url_change
+
+        if es_edicion and (producto_editar.get("img") or "").startswith("http"):
+            img_preview.content = ft.Image(
+                src=producto_editar.get("img"),
+                fit="cover", width=80, height=80)
+
+        def _subir_bytes(contenido, ext):
+            nombre_archivo = f"producto_{datetime.now().strftime('%Y%m%d%H%M%S')}{ext}"
+            content_type = (
+                "image/jpeg" if ext in [".jpg", ".jpeg"] else
+                "image/png" if ext == ".png" else "image/webp"
+            )
+            supabase.storage.from_("productos").upload(
+                nombre_archivo, contenido,
+                {"content-type": content_type, "x-upsert": "true"}
+            )
+            return supabase.storage.from_("productos").get_public_url(nombre_archivo)
+
+        # ── SUBIR DESDE PC ────────────────────────────────────────
+        def subir_imagen_thread():
+            try:
+                root = tk.Tk()
+                root.withdraw()
+                root.attributes("-topmost", True)
+                ruta = filedialog.askopenfilename(
+                    title="Selecciona una imagen",
+                    filetypes=[
+                        ("Imagenes", "*.jpg *.jpeg *.png *.webp"),
+                        ("Todos", "*.*")
+                    ]
+                )
+                root.destroy()
+                if not ruta:
+                    return
+                upload_status.value = "Subiendo imagen..."
+                upload_status.visible = True
+                page.update()
+                with open(ruta, "rb") as f:
+                    contenido = f.read()
+                ext = os.path.splitext(ruta)[1].lower() or ".jpg"
+                url = _subir_bytes(contenido, ext)
+                campo_img.value = url
+                upload_status.value = "✅ Imagen subida correctamente"
+                actualizar_preview(url)
+                page.update()
+            except Exception as ex:
+                upload_status.value = f"❌ Error: {ex}"
+                upload_status.visible = True
+                page.update()
+
+        def subir_imagen(e):
+            threading.Thread(target=subir_imagen_thread, daemon=True).start()
+
+        # ── CAMARA ────────────────────────────────────────────────
+        def abrir_camara_thread():
+            try:
+                import cv2
+                import tempfile
+
+                upload_status.value = "Abriendo camara..."
+                upload_status.visible = True
+                page.update()
+
+                cap = cv2.VideoCapture(0)
+                if not cap.isOpened():
+                    upload_status.value = "❌ No se encontro camara"
+                    upload_status.visible = True
+                    page.update()
+                    return
+
+                upload_status.value = "ESPACIO = capturar  |  ESC = cancelar"
+                page.update()
+
+                while True:
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+                    cv2.imshow("CraftHub - Camara  (ESPACIO = capturar, ESC = salir)", frame)
+                    key = cv2.waitKey(1)
+                    if key == 27:  # ESC
+                        cap.release()
+                        cv2.destroyAllWindows()
+                        upload_status.value = "Camara cancelada"
+                        page.update()
+                        return
+                    elif key == 32:  # ESPACIO
+                        ruta = os.path.join(
+                            tempfile.gettempdir(),
+                            f"crafthub_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+                        )
+                        cv2.imwrite(ruta, frame)
+                        break
+
+                cap.release()
+                cv2.destroyAllWindows()
+
+                upload_status.value = "Subiendo foto..."
+                page.update()
+
+                with open(ruta, "rb") as f:
+                    contenido = f.read()
+
+                url = _subir_bytes(contenido, ".jpg")
+                campo_img.value = url
+                upload_status.value = "✅ Foto tomada y subida"
+                actualizar_preview(url)
+                page.update()
+
+            except ImportError:
+                upload_status.value = "❌ Instala opencv: pip install opencv-python"
+                upload_status.visible = True
+                page.update()
+            except Exception as ex:
+                upload_status.value = f"❌ Error: {ex}"
+                upload_status.visible = True
+                page.update()
+
+        def abrir_camara(e):
+            threading.Thread(target=abrir_camara_thread, daemon=True).start()
+
+        btn_subir = ft.Container(
+            height=40, border_radius=10,
+            bgcolor=BRAND_LIGHT, border=ft.border.all(1, BRAND),
+            alignment=ft.Alignment(0, 0), on_click=subir_imagen,
+            content=ft.Row(
+                alignment=ft.MainAxisAlignment.CENTER, spacing=8,
+                controls=[
+                    ft.Text("📁", size=14),
+                    ft.Text("Subir imagen desde PC", size=13,
+                            color=BRAND, weight=ft.FontWeight.W_500),
+                ]
+            ),
+        )
+
+        btn_camara = ft.Container(
+            height=40, border_radius=10,
+            bgcolor=BRAND_LIGHT, border=ft.border.all(1, BRAND),
+            alignment=ft.Alignment(0, 0), on_click=abrir_camara,
+            content=ft.Row(
+                alignment=ft.MainAxisAlignment.CENTER, spacing=8,
+                controls=[
+                    ft.Text("📷", size=14),
+                    ft.Text("Tomar foto con camara", size=13,
+                            color=BRAND, weight=ft.FontWeight.W_500),
+                ]
+            ),
+        )
 
         def guardar(e):
             if not campo_nombre.value.strip() or not campo_precio.value.strip():
@@ -382,32 +511,23 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
         page.overlay.clear()
         page.overlay.append(
             ft.Container(
-                expand=True,
-                bgcolor="#00000066",
-                alignment=ft.Alignment(0, 0),
-                on_click=cerrar,
+                expand=True, bgcolor="#00000066",
+                alignment=ft.Alignment(0, 0), on_click=cerrar,
                 content=ft.Container(
-                    width=520,
-                    bgcolor="white",
-                    border_radius=16,
-                    padding=28,
+                    width=520, bgcolor="white", border_radius=16, padding=28,
                     content=ft.Column(
-                        spacing=14,
-                        scroll=ft.ScrollMode.AUTO,
+                        spacing=14, scroll=ft.ScrollMode.AUTO,
                         controls=[
                             ft.Row(
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                 controls=[
                                     ft.Text(
                                         "Editar producto" if es_edicion else "Nuevo producto",
-                                        size=20, weight=ft.FontWeight.BOLD,
-                                        color=TEXTO,
+                                        size=20, weight=ft.FontWeight.BOLD, color=TEXTO,
                                     ),
                                     ft.Container(
-                                        width=32, height=32,
-                                        border_radius=16,
-                                        bgcolor=BRAND_LIGHT,
-                                        alignment=ft.Alignment(0, 0),
+                                        width=32, height=32, border_radius=16,
+                                        bgcolor=BRAND_LIGHT, alignment=ft.Alignment(0, 0),
                                         on_click=cerrar,
                                         content=ft.Text("x", color=BRAND,
                                                         weight=ft.FontWeight.BOLD),
@@ -421,11 +541,22 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                                 ft.Container(expand=True, content=campo_stock),
                             ]),
                             dropdown_categoria,
-                            campo_img,
+                            ft.Row(
+                                spacing=12,
+                                vertical_alignment=ft.CrossAxisAlignment.START,
+                                controls=[
+                                    img_preview,
+                                    ft.Column(expand=True, spacing=8, controls=[
+                                        campo_img,
+                                        btn_subir,
+                                        btn_camara,
+                                        upload_status,
+                                    ]),
+                                ]
+                            ),
                             campo_descripcion,
                             ft.Row(
-                                alignment=ft.MainAxisAlignment.END,
-                                spacing=12,
+                                alignment=ft.MainAxisAlignment.END, spacing=12,
                                 controls=[
                                     ft.OutlinedButton("Cancelar", on_click=cerrar),
                                     ft.ElevatedButton(
@@ -459,24 +590,20 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
             modo="vendedor",
         )
 
-    # ── STAT CARD ────────────────────────────────────────────────
     def stat_card(icono, titulo, valor, subtitulo, activo=False):
         return ft.Container(
             expand=True, height=126,
             bgcolor="white", border_radius=14,
-            border=ft.border.all(2 if activo else 1,
-                                  BRAND if activo else BORDER),
+            border=ft.border.all(2 if activo else 1, BRAND if activo else BORDER),
             padding=22,
             shadow=ft.BoxShadow(blur_radius=18, color="#0000000D",
                                 offset=ft.Offset(0, 4)),
             content=ft.Row(
-                spacing=18,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=18, vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
                     ft.Container(
                         width=58, height=58, border_radius=10,
-                        bgcolor=BRAND_LIGHT,
-                        alignment=ft.Alignment(0, 0),
+                        bgcolor=BRAND_LIGHT, alignment=ft.Alignment(0, 0),
                         content=ft.Text(icono, size=28, color=BRAND),
                     ),
                     ft.Column(spacing=4, controls=[
@@ -484,8 +611,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                         ft.Text(valor, size=28, weight=ft.FontWeight.BOLD,
                                 color="#000000"),
                         ft.Container(
-                            border_radius=8,
-                            border=ft.border.all(1, BRAND),
+                            border_radius=8, border=ft.border.all(1, BRAND),
                             padding=ft.padding.symmetric(horizontal=10, vertical=3),
                             content=ft.Text(subtitulo, size=10, color=BRAND),
                         ),
@@ -494,7 +620,6 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
             ),
         )
 
-    # ── TABS ─────────────────────────────────────────────────────
     def construir_tab(tab, texto):
         activo = tab_activo["v"] == tab
         ref = ft.Ref[ft.Container]()
@@ -512,7 +637,6 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
             ),
         )
 
-    # ── PRODUCTO CARD ────────────────────────────────────────────
     def producto_card(p):
         precio = precio_float(p.get("precio", 0))
         stock = int(p.get("stock", 0) or 0)
@@ -554,19 +678,15 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                                     overflow=ft.TextOverflow.ELLIPSIS,
                                 ),
                                 ft.Text(f"${precio:.2f}", size=20,
-                                        color="#000000",
-                                        weight=ft.FontWeight.BOLD),
+                                        color="#000000", weight=ft.FontWeight.BOLD),
                                 ft.Row(spacing=18, controls=[
-                                    ft.Text(f"Stock: {stock}", size=13,
-                                            color=MUTED),
-                                    ft.Text(f"Ventas: {ventas}", size=13,
-                                            color=MUTED),
+                                    ft.Text(f"Stock: {stock}", size=13, color=MUTED),
+                                    ft.Text(f"Ventas: {ventas}", size=13, color=MUTED),
                                 ]),
                                 ft.Container(
                                     border_radius=16,
                                     bgcolor="#D8F8D2" if stock > 0 else "#FFDADA",
-                                    padding=ft.padding.symmetric(
-                                        horizontal=12, vertical=4),
+                                    padding=ft.padding.symmetric(horizontal=12, vertical=4),
                                     content=ft.Text(
                                         "Activo" if stock > 0 else "Agotado",
                                         size=11,
@@ -612,8 +732,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                 content=ft.Column(
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     controls=[
-                        ft.Text("No tienes productos todavia", size=18,
-                                color=MUTED),
+                        ft.Text("No tienes productos todavia", size=18, color=MUTED),
                         ft.Container(height=12),
                         ft.ElevatedButton(
                             "+ Nuevo producto", bgcolor=BRAND, color="white",
@@ -684,101 +803,93 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
 
         return ft.Container(
             bgcolor="white", border_radius=14,
-            border=ft.border.all(1, BORDER),
-            padding=0, clip_behavior=ft.ClipBehavior.HARD_EDGE,
+            border=ft.border.all(1, BORDER), padding=0,
+            clip_behavior=ft.ClipBehavior.HARD_EDGE,
             shadow=ft.BoxShadow(blur_radius=10, color="#0000000D",
                                 offset=ft.Offset(0, 3)),
-            content=ft.Column(
-                spacing=0,
-                controls=[
-                    ft.Container(
-                        bgcolor=BRAND_LIGHT,
-                        padding=ft.padding.symmetric(horizontal=18, vertical=14),
-                        content=ft.Row(
+            content=ft.Column(spacing=0, controls=[
+                ft.Container(
+                    bgcolor=BRAND_LIGHT,
+                    padding=ft.padding.symmetric(horizontal=18, vertical=14),
+                    content=ft.Row(
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        controls=[
+                            ft.Column(spacing=4, controls=[
+                                ft.Text("Factura de pedido", size=16,
+                                        color=TEXTO, weight=ft.FontWeight.BOLD),
+                                ft.Text(pedido.get("comprador_nombre") or "Cliente",
+                                        size=13, color=TEXTO),
+                                ft.Text(pedido.get("direccion") or "Sin direccion",
+                                        size=11, color=MUTED),
+                            ]),
+                            ft.Column(
+                                horizontal_alignment=ft.CrossAxisAlignment.END,
+                                spacing=4,
+                                controls=[
+                                    ft.Text(f"Fecha: {fecha}", size=11, color=MUTED),
+                                    ft.Text(f"Metodo: {pedido.get('metodo_pago', '-')}",
+                                            size=11, color=MUTED),
+                                    ft.Container(
+                                        border_radius=14,
+                                        border=ft.border.all(1, BRAND),
+                                        padding=ft.padding.symmetric(horizontal=10, vertical=3),
+                                        content=ft.Text(estado, size=11, color=BRAND,
+                                                        weight=ft.FontWeight.BOLD),
+                                    ),
+                                ]),
+                        ],
+                    ),
+                ),
+                ft.Container(
+                    bgcolor="#F2F2F2",
+                    padding=ft.padding.symmetric(horizontal=12, vertical=9),
+                    content=ft.Row(controls=[
+                        ft.Container(expand=3, content=ft.Text(
+                            "Producto", size=11, weight=ft.FontWeight.BOLD, color=TEXTO)),
+                        ft.Container(width=80, content=ft.Text(
+                            "Cantidad", size=11, weight=ft.FontWeight.BOLD,
+                            text_align=ft.TextAlign.CENTER)),
+                        ft.Container(width=100, content=ft.Text(
+                            "Precio", size=11, weight=ft.FontWeight.BOLD,
+                            text_align=ft.TextAlign.RIGHT)),
+                        ft.Container(width=110, content=ft.Text(
+                            "Subtotal", size=11, weight=ft.FontWeight.BOLD,
+                            text_align=ft.TextAlign.RIGHT)),
+                    ]),
+                ),
+                ft.Column(spacing=0, controls=[
+                    fila_producto(item) for item in productos_pedido
+                ]),
+                ft.Container(
+                    padding=ft.padding.symmetric(horizontal=18, vertical=14),
+                    content=ft.Column(spacing=8, controls=[
+                        ft.Row(
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                             controls=[
-                                ft.Column(spacing=4, controls=[
-                                    ft.Text("Factura de pedido", size=16,
-                                            color=TEXTO, weight=ft.FontWeight.BOLD),
-                                    ft.Text(pedido.get("comprador_nombre") or "Cliente",
-                                            size=13, color=TEXTO),
-                                    ft.Text(pedido.get("direccion") or "Sin direccion",
-                                            size=11, color=MUTED),
-                                ]),
-                                ft.Column(
-                                    horizontal_alignment=ft.CrossAxisAlignment.END,
-                                    spacing=4,
-                                    controls=[
-                                        ft.Text(f"Fecha: {fecha}", size=11, color=MUTED),
-                                        ft.Text(f"Metodo: {pedido.get('metodo_pago', '-')}",
-                                                size=11, color=MUTED),
-                                        ft.Container(
-                                            border_radius=14,
-                                            border=ft.border.all(1, BRAND),
-                                            padding=ft.padding.symmetric(
-                                                horizontal=10, vertical=3),
-                                            content=ft.Text(estado, size=11,
-                                                            color=BRAND,
-                                                            weight=ft.FontWeight.BOLD),
-                                        ),
-                                    ]),
-                            ],
-                        ),
-                    ),
-                    ft.Container(
-                        bgcolor="#F2F2F2",
-                        padding=ft.padding.symmetric(horizontal=12, vertical=9),
-                        content=ft.Row(controls=[
-                            ft.Container(expand=3, content=ft.Text(
-                                "Producto", size=11, weight=ft.FontWeight.BOLD,
-                                color=TEXTO)),
-                            ft.Container(width=80, content=ft.Text(
-                                "Cantidad", size=11, weight=ft.FontWeight.BOLD,
-                                text_align=ft.TextAlign.CENTER)),
-                            ft.Container(width=100, content=ft.Text(
-                                "Precio", size=11, weight=ft.FontWeight.BOLD,
-                                text_align=ft.TextAlign.RIGHT)),
-                            ft.Container(width=110, content=ft.Text(
-                                "Subtotal", size=11, weight=ft.FontWeight.BOLD,
-                                text_align=ft.TextAlign.RIGHT)),
-                        ]),
-                    ),
-                    ft.Column(spacing=0, controls=[
-                        fila_producto(item) for item in productos_pedido
+                                ft.Text(f"Productos vendidos: {cantidad}",
+                                        size=12, color=MUTED),
+                                ft.Text(f"Subtotal: ${subtotal:.2f}",
+                                        size=12, color=TEXTO, weight=ft.FontWeight.BOLD),
+                            ]),
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.Text("Envio", size=12, color=MUTED),
+                                ft.Text(f"${envio:.2f}", size=12, color=BRAND,
+                                        weight=ft.FontWeight.BOLD),
+                            ]),
+                        ft.Divider(height=8, color="#EEEEEE"),
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.Text("Total pagado", size=15, color=TEXTO,
+                                        weight=ft.FontWeight.BOLD),
+                                ft.Text(f"${total:.2f}", size=18, color=BRAND,
+                                        weight=ft.FontWeight.BOLD),
+                            ]),
                     ]),
-                    ft.Container(
-                        padding=ft.padding.symmetric(horizontal=18, vertical=14),
-                        content=ft.Column(spacing=8, controls=[
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                controls=[
-                                    ft.Text(f"Productos vendidos: {cantidad}",
-                                            size=12, color=MUTED),
-                                    ft.Text(f"Subtotal: ${subtotal:.2f}",
-                                            size=12, color=TEXTO,
-                                            weight=ft.FontWeight.BOLD),
-                                ]),
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                controls=[
-                                    ft.Text("Envio", size=12, color=MUTED),
-                                    ft.Text(f"${envio:.2f}", size=12,
-                                            color=BRAND,
-                                            weight=ft.FontWeight.BOLD),
-                                ]),
-                            ft.Divider(height=8, color="#EEEEEE"),
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                controls=[
-                                    ft.Text("Total pagado", size=15, color=TEXTO,
-                                            weight=ft.FontWeight.BOLD),
-                                    ft.Text(f"${total:.2f}", size=18, color=BRAND,
-                                            weight=ft.FontWeight.BOLD),
-                                ]),
-                        ]),
-                    ),
-                ],
-            ),
+                ),
+            ]),
         )
 
     def vista_pedidos():
@@ -786,8 +897,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
         return ft.Column(
             expand=True, scroll=ft.ScrollMode.AUTO, spacing=14,
             controls=[
-                ft.Text("Pedidos", size=24, weight=ft.FontWeight.BOLD,
-                        color=TEXTO),
+                ft.Text("Pedidos", size=24, weight=ft.FontWeight.BOLD, color=TEXTO),
                 ft.Text("Seguimiento de ventas recibidas.", size=13, color=MUTED),
             ] + ([pedido_card(p) for p in pedidos] if pedidos else [
                 ft.Container(padding=60, alignment=ft.Alignment(0, 0),
@@ -811,8 +921,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
         return ft.Column(
             expand=True, scroll=ft.ScrollMode.AUTO, spacing=16,
             controls=[
-                ft.Text("Estadisticas", size=24, weight=ft.FontWeight.BOLD,
-                        color=TEXTO),
+                ft.Text("Estadisticas", size=24, weight=ft.FontWeight.BOLD, color=TEXTO),
                 ft.Container(
                     bgcolor="white", border_radius=14,
                     border=ft.border.all(1, BORDER), padding=22,
@@ -827,8 +936,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                                 controls=[
                                     ft.Text(nombre, size=14, color=TEXTO),
                                     ft.Text(f"{cantidad} ventas", size=14,
-                                            color=BRAND,
-                                            weight=ft.FontWeight.BOLD),
+                                            color=BRAND, weight=ft.FontWeight.BOLD),
                                 ],
                             )
                             for nombre, cantidad in ranking
@@ -846,8 +954,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
             if ref.current:
                 activo = t == tab
                 ref.current.bgcolor = BRAND_LIGHT if activo else "white"
-                ref.current.border = ft.border.all(
-                    1, BRAND if activo else BORDER)
+                ref.current.border = ft.border.all(1, BRAND if activo else BORDER)
                 ref.current.content.color = BRAND if activo else TEXTO
                 ref.current.content.weight = (ft.FontWeight.BOLD if activo
                                               else ft.FontWeight.NORMAL)
@@ -863,83 +970,67 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
     semana, reciente, total = calcular_stats()
     notis_count = len(cargar_notificaciones())
 
-    # ── HEADER ───────────────────────────────────────────────────
     header = ft.Container(
-        height=96,
-        clip_behavior=ft.ClipBehavior.HARD_EDGE,
-        content=ft.Stack(
-            controls=[
-                ft.Container(
-                    alignment=ft.Alignment(0, -1),
-                    content=ft.Image(
-                        src="banner.png", fit="cover",
-                        width=float("inf"), height=96,
-                    ),
-                ),
-                ft.Container(bgcolor="#00000055", height=96),
-                ft.Container(
-                    padding=ft.padding.symmetric(horizontal=28, vertical=18),
-                    content=ft.Row(
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                        controls=[
-                            ft.Row(spacing=12, controls=[
-                                craft_logo(44, on_click=abrir_panel_vendedor),
-                                ft.Column(spacing=2, controls=[
-                                    ft.Text("CRAFTHUB", size=14, color="white",
-                                            weight=ft.FontWeight.BOLD),
-                                    ft.Text("Panel vendedor", size=12,
-                                            color="#F2F2F2"),
-                                ]),
+        height=96, clip_behavior=ft.ClipBehavior.HARD_EDGE,
+        content=ft.Stack(controls=[
+            ft.Container(
+                alignment=ft.Alignment(0, -1),
+                content=ft.Image(src="banner.png", fit="cover",
+                                 width=float("inf"), height=96),
+            ),
+            ft.Container(bgcolor="#00000055", height=96),
+            ft.Container(
+                padding=ft.padding.symmetric(horizontal=28, vertical=18),
+                content=ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    controls=[
+                        ft.Row(spacing=12, controls=[
+                            craft_logo(44, on_click=abrir_panel_vendedor),
+                            ft.Column(spacing=2, controls=[
+                                ft.Text("CRAFTHUB", size=14, color="white",
+                                        weight=ft.FontWeight.BOLD),
+                                ft.Text("Panel vendedor", size=12, color="#F2F2F2"),
                             ]),
-                            ft.Row(spacing=10, controls=[
-                                # Botón notificaciones con badge
-                                ft.Container(
-                                    width=34, height=34,
-                                    border_radius=17,
-                                    bgcolor="#FFFFFFDD",
-                                    alignment=ft.Alignment(0, 0),
-                                    on_click=abrir_notificaciones,
-                                    content=ft.Stack(controls=[
-                                        ft.Container(
-                                            alignment=ft.Alignment(0, 0),
-                                            content=ft.Text("🔔", size=18)
-                                        ),
-                                        ft.Container(
-                                            width=14, height=14,
-                                            border_radius=7,
-                                            bgcolor=BRAND,
-                                            alignment=ft.Alignment(1, -1),
-                                            visible=notis_count > 0,
-                                            content=ft.Text(
-                                                str(notis_count),
-                                                size=8, color="white",
-                                                weight=ft.FontWeight.BOLD
-                                            )
-                                        )
-                                    ])
-                                ),
-                                ft.Container(
-                                    width=34, height=34, border_radius=17,
-                                    bgcolor="#FFFFFFDD",
-                                    alignment=ft.Alignment(0, 0),
-                                    content=ft.Text("💬", color=BRAND,
-                                                    weight=ft.FontWeight.BOLD)
-                                ),
-                                ft.Container(
-                                    width=34, height=34, border_radius=17,
-                                    bgcolor="#FFFFFFDD",
-                                    alignment=ft.Alignment(0, 0),
-                                    on_click=lambda _: ir_bienvenida(),
-                                    content=ft.Text("🚪", color=BRAND,
-                                                    weight=ft.FontWeight.BOLD)
-                                ),
-                            ]),
-                        ],
-                    ),
+                        ]),
+                        ft.Row(spacing=10, controls=[
+                            ft.Container(
+                                width=34, height=34, border_radius=17,
+                                bgcolor="#FFFFFFDD", alignment=ft.Alignment(0, 0),
+                                on_click=abrir_notificaciones,
+                                content=ft.Stack(controls=[
+                                    ft.Container(
+                                        alignment=ft.Alignment(0, 0),
+                                        content=ft.Text("🔔", size=18)
+                                    ),
+                                    ft.Container(
+                                        width=14, height=14, border_radius=7,
+                                        bgcolor=BRAND, alignment=ft.Alignment(1, -1),
+                                        visible=notis_count > 0,
+                                        content=ft.Text(str(notis_count), size=8,
+                                                        color="white",
+                                                        weight=ft.FontWeight.BOLD)
+                                    )
+                                ])
+                            ),
+                            ft.Container(
+                                width=34, height=34, border_radius=17,
+                                bgcolor="#FFFFFFDD", alignment=ft.Alignment(0, 0),
+                                content=ft.Text("💬", color=BRAND,
+                                                weight=ft.FontWeight.BOLD)
+                            ),
+                            ft.Container(
+                                width=34, height=34, border_radius=17,
+                                bgcolor="#FFFFFFDD", alignment=ft.Alignment(0, 0),
+                                on_click=lambda _: ir_bienvenida(),
+                                content=ft.Text("🚪", color=BRAND,
+                                                weight=ft.FontWeight.BOLD)
+                            ),
+                        ]),
+                    ],
                 ),
-            ],
-        ),
+            ),
+        ]),
     )
 
     buscador = ft.Container(
@@ -947,8 +1038,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
         content=ft.TextField(
             hint_text="Buscar producto...",
             height=42, border_radius=22,
-            border_color="#D8D8D8",
-            focused_border_color=BRAND,
+            border_color="#D8D8D8", focused_border_color=BRAND,
             bgcolor="white",
             content_padding=ft.padding.symmetric(horizontal=18, vertical=9),
             on_change=lambda e: (
@@ -963,12 +1053,9 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
         content=ft.Row(
             spacing=22,
             controls=[
-                stat_card("/", "Esta semana", f"${semana:,.2f}",
-                          "+ ultimos 7 dias"),
-                stat_card("$", "Reciente", f"${reciente:,.2f}",
-                          "Ultimas 24hr", activo=True),
-                stat_card("#", "Total acumulado", f"${total:,.2f}",
-                          "Total de ventas"),
+                stat_card("/", "Esta semana", f"${semana:,.2f}", "+ ultimos 7 dias"),
+                stat_card("$", "Reciente", f"${reciente:,.2f}", "Ultimas 24hr", activo=True),
+                stat_card("#", "Total acumulado", f"${total:,.2f}", "Total de ventas"),
             ],
         ),
     )

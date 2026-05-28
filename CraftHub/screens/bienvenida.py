@@ -8,6 +8,8 @@ BRAND = "#800000"
 
 def show_bienvenida(page: ft.Page, ir_login, ir_explorar=None, ir_registro=None):
     page.clean()
+    page.appbar = None
+    page.update()
 
     page.add(
         ft.Container(

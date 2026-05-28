@@ -10,8 +10,8 @@ if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
 
 import flet as ft
 from screens.bienvenida import show_bienvenida
-from screens.seleccion_rol import show_seleccion_rol
 from screens.login import show_login
+from screens.seleccion_rol import show_seleccion_rol
 from screens.registro import registro
 from screens.personalizar import personalizar
 from screens.home import show_home
@@ -20,11 +20,10 @@ from screens.vendedor import show_vendedor
 from screens.pago import show_pago
 from screens.perfil import show_perfil
 
-
 def main(page: ft.Page):
     page.title = "CraftHub"
-    page.window_width = 1280
-    page.window_height = 800
+    page.window.width = 1280
+    page.window.height = 800
     page.theme_mode = ft.ThemeMode.LIGHT
     page.padding = 0
     page.bgcolor = "#FAFAFA"
@@ -35,9 +34,9 @@ def main(page: ft.Page):
     def ir_bienvenida():
         show_bienvenida(
             page,
-            ir_login=ir_login,
+            ir_login=ir_seleccion_rol,
             ir_explorar=ir_seleccion_rol,
-            ir_registro=ir_registro,
+            ir_registro=ir_seleccion_rol,
         )
 
     def ir_seleccion_rol():
@@ -45,24 +44,29 @@ def main(page: ft.Page):
             page,
             ir_bienvenida=ir_bienvenida,
             ir_comprador=ir_home_visitante,
-            ir_vendedor=ir_login,
+            ir_vendedor=lambda: ir_login("Vendedor"),
+            ir_login_comprador=lambda: ir_login("Comprador"),
+            ir_registro_comprador=lambda: ir_registro("Comprador"),
         )
 
-    def ir_login():
+    def ir_login(modo="Comprador"):
         show_login(
             page,
             ir_bienvenida=ir_bienvenida,
             ir_registro=ir_registro,
             ir_home_comprador=ir_home_comprador,
             ir_home_vendedor=ir_home_vendedor,
+            modo=modo,
+            ir_roles=ir_seleccion_rol,
         )
 
-    def ir_registro():
+    def ir_registro(rol_inicial=None):
         registro(
             page,
             ir_login=ir_login,
             ir_home_comprador=ir_home_comprador,
             ir_home_vendedor=ir_home_vendedor,
+            rol_inicial=rol_inicial,
         )
 
     def ir_personalizar():

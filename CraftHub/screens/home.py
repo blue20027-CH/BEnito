@@ -362,45 +362,51 @@ def show_home(page: ft.Page, ir_bienvenida, ir_carrito=None, carrito_global=None
             content=ft.Column(
                 spacing=0,
                 controls=[
-                    # Imagen
-                    ft.Container(
-                        height=200,
-                        bgcolor=color,
-                        on_click=lambda _, prod=p: abrir_producto(prod),
-                        content=ft.Stack(
-                            controls=[
-                                ft.Image(
-                                    src=img_url if img_valida else "",
-                                    fit="cover",
-                                    width=340, height=200,
-                                    error_content=ft.Container(
-                                        bgcolor=color,
-                                        alignment=ft.Alignment(0, 0),
-                                        content=ft.Text("🎨", size=40)
-                                    ),
-                                ),
-                                ft.Container(
-                                    alignment=ft.Alignment(1, -1),
-                                    padding=10,
-                                    content=ft.Container(
-                                        width=32, height=32,
-                                        border_radius=16,
-                                        bgcolor="white",
-                                        alignment=ft.Alignment(0, 0),
-                                        on_click=lambda _, prod=p: toggle_favorito(prod),
-                                        shadow=ft.BoxShadow(
-                                            blur_radius=4,
-                                            color="#00000020",
-                                            offset=ft.Offset(0, 2)
-                                        ),
-                                        content=ft.Text(
-                                            "❤️" if fav else "🤍", size=15
-                                        )
-                                    )
-                                ),
-                            ]
-                        )
+                   # Imagen
+                ft.Container(
+                   height=200,
+                   bgcolor=color,
+                   on_click=lambda _, prod=p: abrir_producto(prod),
+                   content=ft.Stack(
+                   controls=[
+            # Fondo placeholder siempre visible
+            ft.Container(
+                width=340, height=200,
+                bgcolor=color,
+                alignment=ft.Alignment(0, 0),
+               content=ft.Icon(ft.icons.image_outlined, size=40, color="white") if not img_valida else ft.Text(""),
+            ),
+            # Imagen encima si hay URL válida
+            *([ ft.Image(
+                src=img_url,
+                fit="cover",
+                width=340, height=200,
+            )] if img_valida else []),
+            # Botón favorito
+            ft.Container(
+                alignment=ft.Alignment(1, -1),
+                padding=10,
+                content=ft.Container(
+                    width=32, height=32,
+                    border_radius=16,
+                    bgcolor="white",
+                    alignment=ft.Alignment(0, 0),
+                    on_click=lambda _, prod=p: toggle_favorito(prod),
+                    shadow=ft.BoxShadow(
+                        blur_radius=4,
+                        color="#00000020",
+                        offset=ft.Offset(0, 2)
                     ),
+                   content=ft.Icon(
+                    ft.icons.favorite if fav else ft.icons.favorite_border,
+                    size=16,
+                 color=BRAND if fav else MUTED
+)
+                )
+            ),
+        ]
+    )
+),
                     # Info
                     ft.Container(
                         padding=ft.padding.symmetric(horizontal=16, vertical=12),
@@ -413,8 +419,11 @@ def show_home(page: ft.Page, ir_bienvenida, ir_carrito=None, carrito_global=None
                                         ft.Text(nombre, size=15,
                                                 weight=ft.FontWeight.BOLD,
                                                 color=TEXTO),
-                                        ft.Text("🤍" if not fav else "❤️",
-                                                size=16, color=MUTED),
+                                        ft.Icon(
+                                            ft.icons.favorite if fav else ft.icons.favorite_border,
+                                            size=16,
+                                            color=BRAND if fav else MUTED
+                                ),
                                     ]
                                 ),
                                 ft.Text(origen, size=12, color=MUTED),
@@ -449,7 +458,7 @@ def show_home(page: ft.Page, ir_bienvenida, ir_carrito=None, carrito_global=None
                                             content=ft.Row(
                                                 spacing=6,
                                                 controls=[
-                                                    ft.Text("🛒", size=13),
+                                                    ft.Icon(ft.icons.shopping_cart_outlined, size=16, color="white"),
                                                     ft.Text("Añadir", size=12,
                                                             color="white",
                                                             weight=ft.FontWeight.W_500),
@@ -694,14 +703,14 @@ def show_home(page: ft.Page, ir_bienvenida, ir_carrito=None, carrito_global=None
                                     border_radius=16,
                                     bgcolor="#FF000033",
                                     alignment=ft.Alignment(0, 0),
-                                    content=ft.Text("", size=15)
+                                    content=ft.Icon(ft.icons.notifications_none, size=18, color=BRAND)
                                 ),
                                 ft.Container(
                                     width=32, height=32,
                                     border_radius=16,
                                     bgcolor="#FF000033",
                                     alignment=ft.Alignment(0, 0),
-                                    content=ft.Text("", size=15)
+                                    content=ft.Icon(ft.icons.chat_bubble_outline, size=18, color=BRAND)
                                 ),
                                 ft.Container(
                                     width=32, height=32,
@@ -709,7 +718,7 @@ def show_home(page: ft.Page, ir_bienvenida, ir_carrito=None, carrito_global=None
                                     bgcolor="#FF000033",
                                     alignment=ft.Alignment(0, 0),
                                     on_click=lambda _: ir_carrito() if ir_carrito else None,
-                                    content=ft.Text("🛒", size=15)
+                                    content=ft.Icon(ft.icons.shopping_cart_outlined, size=18, color="white")
                                 ),
                             ])
                         ]
@@ -758,7 +767,7 @@ def show_home(page: ft.Page, ir_bienvenida, ir_carrito=None, carrito_global=None
                     bgcolor="white",
                     padding=ft.padding.symmetric(horizontal=16, vertical=10),
                     content=ft.Row(spacing=8, controls=[
-                        ft.Text("⚡", size=14),
+                        ft.Icon(ft.icons.tune, size=18, color=TEXTO),
                         ft.Text("Filtros", size=13, color=TEXTO,
                                 weight=ft.FontWeight.W_500),
                     ])

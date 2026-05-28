@@ -115,7 +115,6 @@ def abrir_menu_perfil(
             menu_item("+", "Explorar", None, activo=True),
             menu_item("C", "Carrito", ir_carrito),
             menu_item("≡", "Pedidos", ir_pedidos),
-            menu_item("*", "CraftMiles", ir_perfil),
         ]
 
     panel = ft.Container(

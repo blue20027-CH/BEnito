@@ -1,21 +1,20 @@
 import flet as ft
 
 
-def tabler_icon(name, size=24, color=None, on_click=None):
-    icon = ft.Image(
+
+
+def tabler_icon(name, size=24, color=None):
+    return ft.Image(
         src=f"icons/{name}.svg",
         width=size,
         height=size,
         fit="contain",
-    )
-    if color:
-        icon.color = color
-    return ft.Container(
-        width=size,
-        height=size,
-        alignment=ft.Alignment(0, 0),
-        on_click=on_click,
-        content=icon,
+        error_content=ft.Container(
+            width=size,
+            height=size,
+            alignment=ft.Alignment(0, 0),
+            content=ft.Text("", size=1),
+        ),
     )
 
 
@@ -44,18 +43,11 @@ def craft_banner_header(title, subtitle=None, height=68, on_logo_click=None, act
         clip_behavior=ft.ClipBehavior.HARD_EDGE,
         content=ft.Stack(
             controls=[
-                # Imagen sin alignment — metida en Container con alignment
-                ft.Container(
-                    height=height,
+                ft.Image(
+                    src="banner.png",
+                    fit="cover",
                     width=float("inf"),
-                    alignment=ft.Alignment(0, -1),
-                    clip_behavior=ft.ClipBehavior.HARD_EDGE,
-                    content=ft.Image(
-                        src="banner.png",
-                        fit="cover",
-                        width=float("inf"),
-                        height=height,
-                    ),
+                    height=height,
                 ),
                 ft.Container(bgcolor="#00000055", height=height),
                 ft.Container(
@@ -74,10 +66,8 @@ def craft_banner_header(title, subtitle=None, height=68, on_logo_click=None, act
                                         spacing=1,
                                         alignment=ft.MainAxisAlignment.CENTER,
                                         controls=[
-                                            ft.Text(title, size=15, color="white",
-                                                    weight=ft.FontWeight.BOLD),
-                                            ft.Text(subtitle, size=11, color="#F2F2F2",
-                                                    visible=bool(subtitle)),
+                                            ft.Text(title, size=15, color="white", weight=ft.FontWeight.BOLD),
+                                            ft.Text(subtitle, size=11, color="#F2F2F2", visible=bool(subtitle)),
                                         ],
                                     ),
                                 ],
