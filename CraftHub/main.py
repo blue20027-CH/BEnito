@@ -13,12 +13,13 @@ from screens.bienvenida import show_bienvenida
 from screens.login import show_login
 from screens.seleccion_rol import show_seleccion_rol
 from screens.registro import registro
-from screens.personalizar import personalizar
+from screens.preferencias import personalizar, show_preferencias
 from screens.home import show_home
 from screens.carrito import show_carrito
 from screens.vendedor import show_vendedor
 from screens.pago import show_pago
 from screens.perfil import show_perfil
+
 
 def main(page: ft.Page):
     page.title = "CraftHub"
@@ -43,7 +44,7 @@ def main(page: ft.Page):
         show_seleccion_rol(
             page,
             ir_bienvenida=ir_bienvenida,
-            ir_comprador=ir_home_visitante,
+            ir_comprador=ir_preferencias_visitante,
             ir_vendedor=lambda: ir_login("Vendedor"),
             ir_login_comprador=lambda: ir_login("Comprador"),
             ir_registro_comprador=lambda: ir_registro("Comprador"),
@@ -54,7 +55,7 @@ def main(page: ft.Page):
             page,
             ir_bienvenida=ir_bienvenida,
             ir_registro=ir_registro,
-            ir_home_comprador=ir_home_comprador,
+            ir_home_comprador=ir_preferencias_comprador,
             ir_home_vendedor=ir_home_vendedor,
             modo=modo,
             ir_roles=ir_seleccion_rol,
@@ -127,6 +128,27 @@ def main(page: ft.Page):
             carrito_global=carrito_global,
             ir_pago=ir_pago,
             usuario=usuario_global,
+        )
+
+    def ir_preferencias_comprador(user=None, perfil=None):
+        if user:
+            usuario_global["user"] = user
+            usuario_global["perfil"] = perfil
+        show_preferencias(
+            page,
+            ir_home=ir_home_comprador_sin_args,
+            usuario=usuario_global,
+            omitible=True,
+        )
+
+    def ir_preferencias_visitante():
+        usuario_global["user"] = None
+        usuario_global["perfil"] = None
+        show_preferencias(
+            page,
+            ir_home=ir_home_comprador_sin_args,
+            usuario=usuario_global,
+            omitible=True,
         )
 
     ir_bienvenida()

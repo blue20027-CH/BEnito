@@ -2,6 +2,7 @@ import flet as ft
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from supabase_client import supabase
+from screens.componentes import tabler_icon
 
 BRAND = "#800000"
 BRAND_DARK = "#9E1414"
@@ -30,7 +31,6 @@ def abrir_menu_perfil(
         or (user.get("email") if isinstance(user, dict) else None)
         or "craft@crafthub.com"
     )
-    rol = (perfil.get("rol") or modo or "Comprador").capitalize()
     foto = perfil.get("foto") or ""
     iniciales = "".join([p[0].upper() for p in nombre.split()[:2]]) or "CH"
 
@@ -90,7 +90,7 @@ def abrir_menu_perfil(
                 spacing=14,
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
-                    ft.Text(icono, size=18, color="white" if activo else BRAND),
+                    tabler_icon(icono, size=18),
                     ft.Text(
                         texto,
                         size=13,
@@ -103,18 +103,18 @@ def abrir_menu_perfil(
 
     if modo == "vendedor":
         opciones = [
-            menu_item("[]", "Mis productos", None),
-            menu_item("+", "Create", on_create, activo=True),
-            menu_item("##", "Studio", None),
-            menu_item("≡", "Orders", ir_pedidos),
-            menu_item("@", "Suppliers", None),
+            menu_item("building-store", "Mis productos", None),
+            menu_item("plus", "Crear", on_create, activo=True),
+            menu_item("chart-bar", "Estudio", None),
+            menu_item("receipt", "Pedidos", ir_pedidos),
+            menu_item("user", "Clientes", None),
         ]
     else:
         opciones = [
-            menu_item("P", "Mi perfil", ir_perfil),
-            menu_item("+", "Explorar", None, activo=True),
-            menu_item("C", "Carrito", ir_carrito),
-            menu_item("≡", "Pedidos", ir_pedidos),
+            menu_item("user", "Mi perfil", ir_perfil),
+            menu_item("search", "Explorar", None, activo=True),
+            menu_item("shopping-cart", "Carrito", ir_carrito),
+            menu_item("receipt", "Pedidos", ir_pedidos),
         ]
 
     panel = ft.Container(
@@ -137,14 +137,11 @@ def abrir_menu_perfil(
                             border_radius=15,
                             alignment=ft.Alignment(0, 0),
                             on_click=cerrar,
-                            content=ft.Text("<", size=16, color=TEXTO, weight=ft.FontWeight.BOLD),
+                            content=tabler_icon("chevron-left", size=18),
                         )
                     ],
                 ),
-                ft.Container(
-                    alignment=ft.Alignment(0, 0),
-                    content=avatar(),
-                ),
+                ft.Container(alignment=ft.Alignment(0, 0), content=avatar()),
                 ft.Container(height=14),
                 ft.Text(nombre, size=13, color=TEXTO, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
                 ft.Container(height=6),
@@ -160,8 +157,8 @@ def abrir_menu_perfil(
                     content=ft.Row(
                         spacing=12,
                         controls=[
-                            ft.Text("->", size=16, color=MUTED),
-                            ft.Text("Sign Out", size=13, color=BRAND_DARK),
+                            tabler_icon("logout", size=16),
+                            ft.Text("Cerrar sesion", size=13, color=BRAND_DARK),
                         ],
                     ),
                 ),

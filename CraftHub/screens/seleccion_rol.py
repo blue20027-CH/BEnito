@@ -187,7 +187,7 @@ def show_seleccion_rol(
                                     [
                                         pill_button("Iniciar sesion", lambda _: ir_vendedor()),
                                     ],
-                                    botones_top=360,
+                                    botones_top=390,
                                 ),
                                 rol_card(
                                     500,

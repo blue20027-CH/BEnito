@@ -2,7 +2,7 @@ import flet as ft
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from supabase_client import supabase
-from screens.componentes import craft_logo, craft_banner_header
+from screens.componentes import craft_logo, craft_banner_header, tabler_icon
 
 BRAND = "#800000"
 BRAND_LIGHT = "#F5E8E8"
@@ -99,22 +99,24 @@ def show_perfil(page: ft.Page, ir_home, ir_bienvenida, usuario):
                         border_radius=40,
                         bgcolor=BRAND,
                         alignment=ft.Alignment(0, 0),
-                        content=ft.Text(iniciales, size=28, color="white", weight=ft.FontWeight.BOLD)
+                        content=ft.Text(iniciales, size=28, color="white",
+                                        weight=ft.FontWeight.BOLD)
                     ),
                     ft.Column(spacing=6, controls=[
-                        ft.Text(nombre_completo, size=20, weight=ft.FontWeight.BOLD, color=TEXTO),
+                        ft.Text(nombre_completo, size=20,
+                                weight=ft.FontWeight.BOLD, color=TEXTO),
                         ft.Container(
                             border_radius=20,
                             bgcolor=BRAND_LIGHT,
                             padding=ft.padding.symmetric(horizontal=12, vertical=4),
-                            content=ft.Text(rol, size=12, color=BRAND, weight=ft.FontWeight.W_500)
+                            content=ft.Text(rol, size=12, color=BRAND,
+                                            weight=ft.FontWeight.W_500)
                         ),
                         ft.Text(f"Miembro desde {fecha}", size=11, color=MUTED),
                     ])
                 ]),
                 ft.Container(
-                    width=140,
-                    border_radius=14,
+                    width=140, border_radius=14,
                     bgcolor=BRAND_LIGHT,
                     border=ft.border.all(1, BRAND),
                     padding=16,
@@ -122,8 +124,9 @@ def show_perfil(page: ft.Page, ir_home, ir_bienvenida, usuario):
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         spacing=4,
                         controls=[
-                            ft.Text("⭐", size=24),
-                            ft.Text(str("Compras"), size=26, weight=ft.FontWeight.BOLD, color=BRAND),
+                            tabler_icon("shopping-bag", size=28),
+                            ft.Text("Compras", size=26,
+                                    weight=ft.FontWeight.BOLD, color=BRAND),
                             ft.Text("Compras", size=11, color=MUTED),
                         ]
                     )
@@ -140,7 +143,8 @@ def show_perfil(page: ft.Page, ir_home, ir_bienvenida, usuario):
         content=ft.Column(
             spacing=16,
             controls=[
-                ft.Text("Editar informacion", size=16, weight=ft.FontWeight.BOLD, color=TEXTO),
+                ft.Text("Editar informacion", size=16,
+                        weight=ft.FontWeight.BOLD, color=TEXTO),
                 ft.Divider(color="#EEEEEE"),
                 campo_nombre,
                 ft.Row(spacing=16, controls=[
@@ -153,8 +157,9 @@ def show_perfil(page: ft.Page, ir_home, ir_bienvenida, usuario):
                     border=ft.border.all(1, "#EEEEEE"),
                     padding=14,
                     content=ft.Row(spacing=10, controls=[
-                        ft.Text("🔒", size=16),
-                        ft.Text("El rol no puede ser cambiado desde aqui.", size=12, color=MUTED),
+                        tabler_icon("lock", size=16),
+                        ft.Text("El rol no puede ser cambiado desde aqui.",
+                                size=12, color=MUTED),
                     ])
                 ),
                 mensaje,
@@ -177,12 +182,13 @@ def show_perfil(page: ft.Page, ir_home, ir_bienvenida, usuario):
         )
     )
 
-    def info_row(emoji, label, valor):
+    def info_row(icono, label, valor):
         return ft.Row(spacing=12, controls=[
-            ft.Text(emoji, size=18),
+            tabler_icon(icono, size=18),
             ft.Column(spacing=1, controls=[
                 ft.Text(label, size=11, color=MUTED),
-                ft.Text(str(valor) if valor else "—", size=13, color=TEXTO, weight=ft.FontWeight.W_500),
+                ft.Text(str(valor) if valor else "—", size=13, color=TEXTO,
+                        weight=ft.FontWeight.W_500),
             ])
         ])
 
@@ -194,16 +200,16 @@ def show_perfil(page: ft.Page, ir_home, ir_bienvenida, usuario):
         content=ft.Column(
             spacing=16,
             controls=[
-                ft.Text("Resumen de cuenta", size=16, weight=ft.FontWeight.BOLD, color=TEXTO),
+                ft.Text("Resumen de cuenta", size=16,
+                        weight=ft.FontWeight.BOLD, color=TEXTO),
                 ft.Divider(color="#EEEEEE"),
-                info_row("📍", "Ubicacion", perfil.get("ubicacion") or "—"),
-                info_row("📞", "Telefono", perfil.get("telefono") or "—"),
-                info_row("🎭", "Rol", rol),
-                info_row("📅", "Miembro desde", fecha),
+                info_row("map-pin", "Ubicacion", perfil.get("ubicacion") or "—"),
+                info_row("phone", "Telefono", perfil.get("telefono") or "—"),
+                info_row("user", "Rol", rol),
+                info_row("calendar", "Miembro desde", fecha),
                 ft.Container(height=8),
                 ft.Container(
-                    height=44,
-                    border_radius=10,
+                    height=44, border_radius=10,
                     bgcolor=BRAND_LIGHT,
                     border=ft.border.all(1, BRAND),
                     alignment=ft.Alignment(0, 0),
@@ -212,8 +218,9 @@ def show_perfil(page: ft.Page, ir_home, ir_bienvenida, usuario):
                         alignment=ft.MainAxisAlignment.CENTER,
                         spacing=8,
                         controls=[
-                            ft.Text("🚪", size=16),
-                            ft.Text("Cerrar sesion", size=13, color=BRAND, weight=ft.FontWeight.BOLD),
+                            tabler_icon("logout", size=16),
+                            ft.Text("Cerrar sesion", size=13, color=BRAND,
+                                    weight=ft.FontWeight.BOLD),
                         ]
                     )
                 )
@@ -222,9 +229,7 @@ def show_perfil(page: ft.Page, ir_home, ir_bienvenida, usuario):
     )
 
     contenido = ft.Column(
-        expand=True,
-        scroll=ft.ScrollMode.AUTO,
-        spacing=20,
+        expand=True, scroll=ft.ScrollMode.AUTO, spacing=20,
         controls=[
             tarjeta_superior,
             ft.Row(
@@ -249,14 +254,14 @@ def show_perfil(page: ft.Page, ir_home, ir_bienvenida, usuario):
                 on_click=lambda _: ir_home()
             ),
             ft.Container(
-                height=34,
-                border_radius=8,
+                height=34, border_radius=8,
                 bgcolor="white",
                 padding=ft.padding.symmetric(horizontal=14, vertical=6),
                 on_click=lambda _: cerrar_sesion(),
                 content=ft.Row(spacing=6, controls=[
-                    ft.Text("🚪", size=14, color=BRAND),
-                    ft.Text("Cerrar sesion", size=13, color=BRAND, weight=ft.FontWeight.W_500),
+                    tabler_icon("logout", size=14),
+                    ft.Text("Cerrar sesion", size=13, color=BRAND,
+                            weight=ft.FontWeight.W_500),
                 ])
             )
         ],
@@ -264,13 +269,11 @@ def show_perfil(page: ft.Page, ir_home, ir_bienvenida, usuario):
 
     page.add(
         ft.Column(
-            expand=True,
-            spacing=0,
+            expand=True, spacing=0,
             controls=[
                 header,
                 ft.Container(
-                    expand=True,
-                    padding=24,
+                    expand=True, padding=24,
                     bgcolor="#FAFAFA",
                     content=contenido
                 )

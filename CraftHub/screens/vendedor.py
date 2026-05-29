@@ -3,7 +3,7 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from supabase_client import supabase
 from screens.menu_perfil import abrir_menu_perfil
-from screens.componentes import craft_logo
+from screens.componentes import craft_logo, tabler_icon
 from datetime import datetime, timezone, timedelta
 import threading
 import tkinter as tk
@@ -164,8 +164,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                                     ft.Container(
                                         width=36, height=36, border_radius=8,
                                         bgcolor=BRAND, alignment=ft.Alignment(0, 0),
-                                        content=ft.Text("CH", color="white", size=12,
-                                                        weight=ft.FontWeight.BOLD)
+                                        content=craft_logo(30)
                                     ),
                                     ft.Text("CRAFTHUB", size=13, color=TEXTO,
                                             weight=ft.FontWeight.BOLD),
@@ -182,14 +181,14 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                                 ft.Container(
                                     width=70, height=70, border_radius=35,
                                     bgcolor=BRAND, alignment=ft.Alignment(0, 0),
-                                    content=ft.Text("💰", size=32)
+                                    content=tabler_icon("cash", size=36)
                                 ),
                                 ft.Column(spacing=4, controls=[
                                     ft.Row(spacing=8, controls=[
                                         ft.Text(n.get("titulo", "Nueva venta"),
                                                 size=18, weight=ft.FontWeight.BOLD,
                                                 color=TEXTO),
-                                        ft.Text("📢", size=16),
+                                        tabler_icon("megaphone", size=16),
                                     ]),
                                     ft.Text(n.get("mensaje", ""), size=13, color=MUTED),
                                 ])
@@ -208,7 +207,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                                         ft.Text("Ver producto pendiente",
                                                 color="white", size=14,
                                                 weight=ft.FontWeight.BOLD),
-                                        ft.Text("›", color="white", size=20),
+                                        tabler_icon("chevron-right", size=20),
                                     ]
                                 )
                             )
@@ -225,7 +224,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                     content=ft.Column(
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         controls=[
-                            ft.Text("🔔", size=40),
+                            tabler_icon("bell", size=40),
                             ft.Text("No tienes notificaciones nuevas",
                                     size=14, color=MUTED),
                         ]
@@ -315,7 +314,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
             width=80, height=80, border_radius=10,
             bgcolor="#F0F0F0", border=ft.border.all(1, BORDER),
             alignment=ft.Alignment(0, 0),
-            content=ft.Text("🖼️", size=28),
+            content=tabler_icon("photo", size=28),
         )
 
         def actualizar_preview(url):
@@ -323,7 +322,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                 img_preview.content = ft.Image(
                     src=url, fit="cover", width=80, height=80)
             else:
-                img_preview.content = ft.Text("🖼️", size=28)
+                img_preview.content = tabler_icon("photo", size=28)
             page.update()
 
         def on_url_change(e):
@@ -372,11 +371,11 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                 ext = os.path.splitext(ruta)[1].lower() or ".jpg"
                 url = _subir_bytes(contenido, ext)
                 campo_img.value = url
-                upload_status.value = "✅ Imagen subida correctamente"
+                upload_status.value = "Imagen subida correctamente"
                 actualizar_preview(url)
                 page.update()
             except Exception as ex:
-                upload_status.value = f"❌ Error: {ex}"
+                upload_status.value = f"Error: {ex}"
                 upload_status.visible = True
                 page.update()
 
@@ -395,7 +394,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
 
                 cap = cv2.VideoCapture(0)
                 if not cap.isOpened():
-                    upload_status.value = "❌ No se encontro camara"
+                    upload_status.value = "No se encontro camara"
                     upload_status.visible = True
                     page.update()
                     return
@@ -434,16 +433,16 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
 
                 url = _subir_bytes(contenido, ".jpg")
                 campo_img.value = url
-                upload_status.value = "✅ Foto tomada y subida"
+                upload_status.value = "Foto tomada y subida"
                 actualizar_preview(url)
                 page.update()
 
             except ImportError:
-                upload_status.value = "❌ Instala opencv: pip install opencv-python"
+                upload_status.value = "Instala opencv: pip install opencv-python"
                 upload_status.visible = True
                 page.update()
             except Exception as ex:
-                upload_status.value = f"❌ Error: {ex}"
+                upload_status.value = f"Error: {ex}"
                 upload_status.visible = True
                 page.update()
 
@@ -457,7 +456,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
             content=ft.Row(
                 alignment=ft.MainAxisAlignment.CENTER, spacing=8,
                 controls=[
-                    ft.Text("📁", size=14),
+                    tabler_icon("upload", size=16),
                     ft.Text("Subir imagen desde PC", size=13,
                             color=BRAND, weight=ft.FontWeight.W_500),
                 ]
@@ -604,7 +603,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                     ft.Container(
                         width=58, height=58, border_radius=10,
                         bgcolor=BRAND_LIGHT, alignment=ft.Alignment(0, 0),
-                        content=ft.Text(icono, size=28, color=BRAND),
+                        content=tabler_icon(icono, size=28),
                     ),
                     ft.Column(spacing=4, controls=[
                         ft.Text(titulo, size=14, color=MUTED),
@@ -1001,7 +1000,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                                 content=ft.Stack(controls=[
                                     ft.Container(
                                         alignment=ft.Alignment(0, 0),
-                                        content=ft.Text("🔔", size=18)
+                                        content=tabler_icon("bell", size=18)
                                     ),
                                     ft.Container(
                                         width=14, height=14, border_radius=7,
@@ -1016,15 +1015,13 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                             ft.Container(
                                 width=34, height=34, border_radius=17,
                                 bgcolor="#FFFFFFDD", alignment=ft.Alignment(0, 0),
-                                content=ft.Text("💬", color=BRAND,
-                                                weight=ft.FontWeight.BOLD)
+                                content=tabler_icon("message", size=18)
                             ),
                             ft.Container(
                                 width=34, height=34, border_radius=17,
                                 bgcolor="#FFFFFFDD", alignment=ft.Alignment(0, 0),
                                 on_click=lambda _: ir_bienvenida(),
-                                content=ft.Text("🚪", color=BRAND,
-                                                weight=ft.FontWeight.BOLD)
+                                content=tabler_icon("logout", size=18)
                             ),
                         ]),
                     ],
@@ -1053,9 +1050,9 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
         content=ft.Row(
             spacing=22,
             controls=[
-                stat_card("/", "Esta semana", f"${semana:,.2f}", "+ ultimos 7 dias"),
-                stat_card("$", "Reciente", f"${reciente:,.2f}", "Ultimas 24hr", activo=True),
-                stat_card("#", "Total acumulado", f"${total:,.2f}", "Total de ventas"),
+                stat_card("chart-line", "Esta semana", f"${semana:,.2f}", "Ultimos 7 dias"),
+                stat_card("cash", "Reciente", f"${reciente:,.2f}", "Ultimas 24hr", activo=True),
+                stat_card("chart-bar", "Total acumulado", f"${total:,.2f}", "Total de ventas"),
             ],
         ),
     )

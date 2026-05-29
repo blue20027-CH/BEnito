@@ -3,7 +3,7 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from supabase_client import supabase
 from screens.envio import calcular_envio
-from screens.componentes import craft_logo, craft_banner_header
+from screens.componentes import craft_logo, craft_banner_header, tabler_icon
 
 BRAND = "#800000"
 BRAND_LIGHT = "#F5E8E8"
@@ -59,10 +59,14 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
             subtotal, envio, total, detalle_envio = calcular_resumen()
             productos_lista = [
                 {
+                    "id": p.get("id"),
                     "nombre": p.get("nombre"),
                     "precio": p.get("precio"),
                     "cantidad": p.get("cantidad", 1),
                     "creador": p.get("creador"),
+                    "img": p.get("img"),
+                    "categoria": p.get("categoria"),
+                    "estado": "pendiente",
                 }
                 for p in carrito_global if p is not None
             ]
@@ -149,7 +153,7 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
                             border_radius=40,
                             bgcolor=BRAND_LIGHT,
                             alignment=ft.Alignment(0, 0),
-                            content=ft.Text("✅", size=40)
+                            content=tabler_icon("check", size=42)
                         ),
                         ft.Text("Pago exitoso", size=26,
                                 weight=ft.FontWeight.BOLD, color=TEXTO),
@@ -250,15 +254,14 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
                             bgcolor=BRAND_LIGHT,
                             alignment=ft.Alignment(0, 0),
                             on_click=lambda _: mostrar_seleccion(),
-                            content=ft.Text("←", size=16, color=BRAND,
-                                            weight=ft.FontWeight.BOLD)
+                            content=tabler_icon("arrow-left", size=16)
                         ),
                     ]),
                     ft.Text("Tarjeta de debito o Credito", size=22,
                             weight=ft.FontWeight.BOLD, color=TEXTO,
                             text_align=ft.TextAlign.CENTER),
                     ft.Row(spacing=8, controls=[
-                        ft.Text("💳", size=20),
+                        tabler_icon("credit-card", size=20),
                         ft.Text("Visa  •  Mastercard  •  American Express",
                                 size=12, color=MUTED),
                     ]),
@@ -359,8 +362,7 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
                             bgcolor=BRAND_LIGHT,
                             alignment=ft.Alignment(0, 0),
                             on_click=lambda _: mostrar_seleccion(),
-                            content=ft.Text("←", size=16, color=BRAND,
-                                            weight=ft.FontWeight.BOLD)
+                            content=tabler_icon("arrow-left", size=16)
                         ),
                     ]),
                     ft.Text("Transferencia Bancaria", size=22,
@@ -422,8 +424,6 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
                 error.visible = True
                 page.update()
 
-        emojis = {"Yappy": "💛", "PayPal": "🔵", "Banistmo": "🟡"}
-
         return ft.Container(
             width=560,
             bgcolor="white",
@@ -442,13 +442,19 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
                             bgcolor=BRAND_LIGHT,
                             alignment=ft.Alignment(0, 0),
                             on_click=lambda _: mostrar_seleccion(),
-                            content=ft.Text("←", size=16, color=BRAND,
-                                            weight=ft.FontWeight.BOLD)
+                            content=tabler_icon("arrow-left", size=16)
                         ),
                     ]),
-                    ft.Text(f"{emojis.get(nombre, '')} {nombre}",
+                    ft.Row(
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        spacing=10,
+                        controls=[
+                            tabler_icon("wallet", size=22),
+                            ft.Text(nombre,
                             size=22, weight=ft.FontWeight.BOLD,
-                            color=TEXTO, text_align=ft.TextAlign.CENTER),
+                                    color=TEXTO, text_align=ft.TextAlign.CENTER),
+                        ],
+                    ),
                     ft.Text(
                         f"Paga con tu cuenta de {nombre}",
                         size=13, color=MUTED,
@@ -485,7 +491,7 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
             vista_ref.current.controls = [vista]
         page.update()
 
-    def opcion_metodo(emoji, titulo, subtitulo, accion):
+    def opcion_metodo(icono, titulo, subtitulo, accion):
         return ft.Container(
             height=64,
             border_radius=10,
@@ -505,7 +511,7 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
                             border_radius=22,
                             bgcolor="#A94747",
                             alignment=ft.Alignment(0, 0),
-                            content=ft.Text(emoji, size=20, color="white")
+                            content=tabler_icon(icono, size=22)
                         ),
                         ft.Column(spacing=2, controls=[
                             ft.Text(titulo, size=14,
@@ -513,12 +519,12 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
                             ft.Text(subtitulo, size=11, color=MUTED),
                         ])
                     ]),
-                    ft.Text("›", size=22, color=MUTED),
+                    tabler_icon("chevron-right", size=22),
                 ]
             )
         )
 
-    def billetera_btn(emoji, nombre):
+    def billetera_btn(icono, nombre):
         return ft.Container(
             expand=True,
             height=76,
@@ -528,11 +534,19 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
             alignment=ft.Alignment(0, 0),
             on_click=lambda _: mostrar_vista(vista_billetera(nombre)),
             shadow=ft.BoxShadow(blur_radius=8, color="#0000000D", offset=ft.Offset(0, 2)),
-            content=ft.Text(
-                nombre,
-                size=22 if nombre != "Banistmo" else 20,
-                weight=ft.FontWeight.BOLD,
-                color="#1456A7" if nombre in ["PayPal", "Banistmo"] else "#2878B8",
+            content=ft.Column(
+                spacing=4,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                alignment=ft.MainAxisAlignment.CENTER,
+                controls=[
+                    tabler_icon(icono, size=22),
+                    ft.Text(
+                        nombre,
+                        size=16 if nombre != "Banistmo" else 15,
+                        weight=ft.FontWeight.BOLD,
+                        color="#1456A7" if nombre in ["PayPal", "Banistmo"] else "#2878B8",
+                    ),
+                ],
             )
         )
 
@@ -555,12 +569,12 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
                             text_align=ft.TextAlign.CENTER),
                     ft.Container(height=4),
                     opcion_metodo(
-                        "💳", "Tarjeta de debito o Credito",
+                        "credit-card", "Tarjeta de debito o Credito",
                         "Visa, Mastercard, American Express",
                         lambda _: mostrar_vista(vista_tarjeta())
                     ),
                     opcion_metodo(
-                        "🏦", "Transferencia Bancaria",
+                        "building-bank", "Transferencia Bancaria",
                         "Realiza tu pago desde tu banco",
                         lambda _: mostrar_vista(vista_transferencia())
                     ),
@@ -570,9 +584,9 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
                     ft.Row(
                         spacing=12,
                         controls=[
-                            billetera_btn("💛", "Yappy"),
-                            billetera_btn("🔵", "PayPal"),
-                            billetera_btn("🟡", "Banistmo"),
+                            billetera_btn("wallet", "Yappy"),
+                            billetera_btn("wallet", "PayPal"),
+                            billetera_btn("wallet", "Banistmo"),
                         ]
                     ),
                     ft.Container(height=8),
@@ -644,14 +658,14 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
                                 spacing=16,
                                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                                 controls=[
-                                    opcion_metodo("▣", "Tarjeta de debito o Credito", "Visa, Mastercard, American Express", lambda _: mostrar_vista(vista_tarjeta())),
-                                    opcion_metodo("⌂", "Transferencia Bancaria", "Realiza tu pago desde tu banco", lambda _: mostrar_vista(vista_transferencia())),
+                                    opcion_metodo("credit-card", "Tarjeta de debito o Credito", "Visa, Mastercard, American Express", lambda _: mostrar_vista(vista_tarjeta())),
+                                    opcion_metodo("building-bank", "Transferencia Bancaria", "Realiza tu pago desde tu banco", lambda _: mostrar_vista(vista_transferencia())),
                                     ft.Container(height=10),
                                     ft.Text("O elige otra forma de pago", size=12, color=TEXTO),
                                     ft.Row(spacing=16, controls=[
-                                        billetera_btn("", "Yappy"),
-                                        billetera_btn("", "PayPal"),
-                                        billetera_btn("", "Banistmo"),
+                                        billetera_btn("wallet", "Yappy"),
+                                        billetera_btn("wallet", "PayPal"),
+                                        billetera_btn("wallet", "Banistmo"),
                                     ]),
                                     ft.Container(
                                         bgcolor="#FAFAFA",
@@ -700,7 +714,7 @@ def show_pago(page: ft.Page, ir_home, carrito_global, usuario):
                             weight=ft.FontWeight.BOLD, color="white"),
                 ]),
                 ft.TextButton(
-                    "← Volver",
+                    "Volver",
                     style=ft.ButtonStyle(color="white"),
                     on_click=lambda _: ir_home()
                 )
