@@ -17,6 +17,7 @@ def abrir_menu_perfil(
     ir_perfil=None,
     ir_carrito=None,
     ir_pedidos=None,
+    ir_calendario=None,
     ir_bienvenida=None,
     on_create=None,
     modo="comprador",
@@ -107,6 +108,7 @@ def abrir_menu_perfil(
             menu_item("plus", "Crear", on_create, activo=True),
             menu_item("chart-bar", "Estudio", None),
             menu_item("receipt", "Pedidos", ir_pedidos),
+            menu_item("calendar", "Eventos", ir_calendario),
             menu_item("user", "Clientes", None),
         ]
     else:
@@ -115,6 +117,7 @@ def abrir_menu_perfil(
             menu_item("search", "Explorar", None, activo=True),
             menu_item("shopping-cart", "Carrito", ir_carrito),
             menu_item("receipt", "Pedidos", ir_pedidos),
+            menu_item("calendar", "Eventos", ir_calendario),
         ]
 
     panel = ft.Container(

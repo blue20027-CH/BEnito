@@ -593,6 +593,16 @@ def show_home(
                     ft.Text("Mi carrito", size=13, color=TEXTO),
                 ])
             ),
+            ft.Container(
+                border_radius=8,
+                padding=ft.padding.symmetric(horizontal=12, vertical=10),
+                on_click=lambda _: (toggle_menu(None),
+                                   ir_calendario() if ir_calendario else None),
+                content=ft.Row(spacing=10, controls=[
+                    tabler_icon("calendar", size=16),
+                    ft.Text("Eventos", size=13, color=TEXTO),
+                ])
+            ),
             ft.Divider(color="#EEEEEE"),
             ft.Container(
                 border_radius=8,
@@ -635,12 +645,14 @@ def show_home(
                                 width=32, height=32, border_radius=16,
                                 bgcolor="#FFFFFF33",
                                 alignment=ft.Alignment(0, 0),
+                                on_click=lambda _: ir_notificaciones() if ir_notificaciones else (ir_tracking() if ir_tracking else None),
                                 content=tabler_icon("bell", size=18),
                             ),
                             ft.Container(
                                 width=32, height=32, border_radius=16,
                                 bgcolor="#FFFFFF33",
                                 alignment=ft.Alignment(0, 0),
+                                on_click=lambda _: ir_calendario() if ir_calendario else None,
                                 content=tabler_icon("message", size=18),
                             ),
                             ft.Container(
@@ -675,7 +687,7 @@ def show_home(
         height=44,
         content_padding=ft.padding.symmetric(horizontal=20, vertical=10),
         on_change=on_busqueda,
-        prefix_icon=ft.icons.SEARCH,
+       prefix_icon=ft.Icon(ft.Icons.SEARCH),
     )
 
     barra_busqueda = ft.Container(

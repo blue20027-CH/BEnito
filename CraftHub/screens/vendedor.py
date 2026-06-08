@@ -16,9 +16,10 @@ TEXTO = "#232323"
 MUTED = "#777777"
 BORDER = "#E5DADA"
 BG = "#FAFAFA"
+ESTADOS_PEDIDO = [("pendiente", "Pendiente"), ("en proceso", "Preparando"), ("enviado", "Enviado"), ("entregado", "Entregado")]
 
 
-def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
+def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None, ir_tracking=None, ir_calendario=None):
     page.clean()
 
     perfil = usuario.get("perfil") or {}
@@ -584,6 +585,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
             page, usuario,
             ir_perfil=ir_perfil,
             ir_pedidos=lambda: cambiar_tab("pedidos"),
+            ir_calendario=ir_calendario,
             ir_bienvenida=ir_bienvenida,
             on_create=lambda: mostrar_formulario(),
             modo="vendedor",
@@ -776,6 +778,26 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
         total = float(pedido.get("total") or (subtotal + envio))
         fecha = (pedido.get("created_at") or "")[:10] or "Sin fecha"
         productos_pedido = pedido.get("productos") or []
+        nombres_vendedor = [p.get("nombre") for p in productos]
+
+        def actualizar_estado(nuevo_estado):
+            try:
+                productos_actualizados = []
+                for item in productos_pedido:
+                    item_actualizado = dict(item)
+                    if item_actualizado.get("nombre") in nombres_vendedor:
+                        item_actualizado["estado"] = nuevo_estado
+                    productos_actualizados.append(item_actualizado)
+                supabase.table("pedidos").update({"estado": nuevo_estado, "productos": productos_actualizados}).eq("id", pedido.get("id")).execute()
+                mostrar_snack(f"Pedido marcado como {nuevo_estado}.")
+                cambiar_tab("pedidos")
+            except Exception as ex:
+                print("Error actualizando estado del pedido:", ex)
+                mostrar_snack("No se pudo actualizar el estado.")
+
+        def boton_estado(valor, texto):
+            activo = (pedido.get("estado") or "pendiente").lower() == valor
+            return ft.Container(height=34, border_radius=17, bgcolor=BRAND if activo else "white", border=ft.border.all(1, BRAND), padding=ft.padding.symmetric(horizontal=12), alignment=ft.Alignment(0, 0), on_click=lambda _, v=valor: actualizar_estado(v), content=ft.Text(texto, size=11, color="white" if activo else BRAND, weight=ft.FontWeight.BOLD))
 
         def fila_producto(item):
             precio = precio_float(item.get("precio", 0))
@@ -878,6 +900,7 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
                                         weight=ft.FontWeight.BOLD),
                             ]),
                         ft.Divider(height=8, color="#EEEEEE"),
+                        ft.Row(wrap=True, spacing=8, run_spacing=8, controls=[boton_estado(valor, texto) for valor, texto in ESTADOS_PEDIDO]),
                         ft.Row(
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                             controls=[
@@ -896,8 +919,16 @@ def show_vendedor(page: ft.Page, ir_bienvenida, usuario, ir_perfil=None):
         return ft.Column(
             expand=True, scroll=ft.ScrollMode.AUTO, spacing=14,
             controls=[
-                ft.Text("Pedidos", size=24, weight=ft.FontWeight.BOLD, color=TEXTO),
-                ft.Text("Seguimiento de ventas recibidas.", size=13, color=MUTED),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    controls=[
+                        ft.Column(spacing=4, controls=[
+                            ft.Text("Pedidos", size=24, weight=ft.FontWeight.BOLD, color=TEXTO),
+                            ft.Text("Seguimiento de ventas recibidas.", size=13, color=MUTED),
+                        ]),
+                        ft.ElevatedButton("Abrir mapa de tracking", bgcolor=BRAND, color="white", height=42, on_click=lambda _: ir_tracking() if ir_tracking else None),
+                    ],
+                ),
             ] + ([pedido_card(p) for p in pedidos] if pedidos else [
                 ft.Container(padding=60, alignment=ft.Alignment(0, 0),
                              content=ft.Text("No hay pedidos todavia",

@@ -12,30 +12,29 @@ LINE = "#B8B8B8"
 PROVINCIAS = [
     ("Colon", "Colon.png"),
     ("Chiriqui", "Chiriqui.png"),
-    ("Bocas del Toro", "Bocas del toro.png"),
+    ("Bocas del Toro", "Bocas_del_toro.png"),
     ("Veraguas", "Veraguas.png"),
     ("Cocle", "Cocle.png"),
     ("Panama", "Panama.png"),
-    ("Panama Oeste", "Panama Oeste.png"),
-    ("Los Santos", "Los santos.png"),
+    ("Panama Oeste", "Panama_Oeste.png"),
+    ("Los Santos", "Los_Santos.png"),
     ("Darien", "Darien.png"),
     ("Herrera", "Herrera.png"),
-    ("Comarca Guna-Yala", "Guna Yala.png"),
-    ("Comarca Ngabe-Bugle", "Ngabe Bugle.png"),
+    ("Comarca Guna-Yala", "Guna-Yala.png"),
+    ("Comarca Ngabe-Bugle", "ngabe-bugle.png"),
     ("Comarca Embera-Wounaan", "Emberá-Wounaan.png"),
-    ("Comarca Madugandi", "Madugandi.png"),
-    ("Comarca Wargandi", "Wargandi.png"),
+    ("Comarca Madugandi", "Madugandí.png"),
 ]
 
 CATEGORIAS = [
-    ("Gastronomy", "tools-kitchen-2"),
-    ("Handicrafts", "sunglasses"),
-    ("Footwear", "shoe"),
-    ("Jewelry", "diamond"),
+    ("Gastronomia", "tools-kitchen-2"),
+    ("Artesanias", "sunglasses"),
+    ("Calzado", "shoe"),
+    ("Joyeria", "diamond"),
     ("Textiles", "shirt"),
-    ("Ceramics", "guitar-pick"),
-    ("Leather", "shopping-bag"),
-    ("Wood", "trees"),
+    ("Ceramica", "guitar-pick"),
+    ("Cuero", "shopping-bag"),
+    ("Madera", "trees"),
 ]
 
 
@@ -177,7 +176,7 @@ def show_preferencias(page: ft.Page, ir_home, usuario=None, omitible=True):
                     alignment=ft.Alignment(0, 0),
                     content=tabler_icon("arrow-left", size=24),
                 ),
-                section_title("Select the provinces of Panama that interest you"),
+                section_title("Selecciona las provincias de Panama que te interesan"),
                 craft_logo(46),
             ],
         ),
@@ -192,7 +191,7 @@ def show_preferencias(page: ft.Page, ir_home, usuario=None, omitible=True):
             ft.Container(
                 width=1180,
                 alignment=ft.Alignment(-1, 0),
-                content=ft.Text("Province of interest", size=20, color=BRAND, weight=ft.FontWeight.BOLD),
+                content=ft.Text("Provincias de interes", size=20, color=BRAND, weight=ft.FontWeight.BOLD),
             ),
             ft.Container(
                 width=1240,
@@ -202,11 +201,11 @@ def show_preferencias(page: ft.Page, ir_home, usuario=None, omitible=True):
                 content=ft.Column(spacing=24, controls=rows(PROVINCIAS, flag_card, 5)),
             ),
             ft.Container(height=6),
-            section_title("What types of products interest you?"),
+            section_title("Que tipos de productos te interesan?"),
             ft.Container(
                 width=1180,
                 alignment=ft.Alignment(-1, 0),
-                content=ft.Text("Main interests", size=28, color=BRAND, weight=ft.FontWeight.BOLD),
+                content=ft.Text("Intereses principales", size=28, color=BRAND, weight=ft.FontWeight.BOLD),
             ),
             ft.Container(
                 width=1180,

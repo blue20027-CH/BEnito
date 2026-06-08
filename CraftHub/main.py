@@ -14,11 +14,14 @@ from screens.login import show_login
 from screens.seleccion_rol import show_seleccion_rol
 from screens.registro import registro
 from screens.preferencias import personalizar, show_preferencias
+from screens.calendario import show_calendario
 from screens.home import show_home
 from screens.carrito import show_carrito
 from screens.vendedor import show_vendedor
 from screens.pago import show_pago
 from screens.perfil import show_perfil
+from screens.notificaciones import show_notificaciones_comprador
+from screens.tracking import show_tracking
 
 
 def main(page: ft.Page):
@@ -84,6 +87,9 @@ def main(page: ft.Page):
             carrito_global=carrito_global,
             usuario=usuario_global,
             ir_perfil=ir_perfil,
+            ir_notificaciones=ir_notificaciones_comprador,
+            ir_tracking=ir_tracking,
+            ir_calendario=ir_calendario,
         )
 
     def ir_home_comprador_sin_args():
@@ -103,7 +109,24 @@ def main(page: ft.Page):
             ir_bienvenida=ir_bienvenida,
             usuario=usuario_global,
             ir_perfil=ir_perfil,
+            ir_tracking=ir_tracking,
+            ir_calendario=ir_calendario,
         )
+
+    def ir_calendario():
+        perfil = usuario_global.get("perfil") or {}
+        rol = (perfil.get("rol") or perfil.get("tipo") or "").lower()
+        volver = ir_home_vendedor if "vendedor" in rol else ir_home_comprador_sin_args
+        show_calendario(page, ir_back=volver, usuario=usuario_global)
+
+    def ir_tracking(pedido=None):
+        perfil = usuario_global.get("perfil") or {}
+        rol = (perfil.get("rol") or perfil.get("tipo") or "").lower()
+        volver = ir_home_vendedor if "vendedor" in rol else ir_home_comprador_sin_args
+        show_tracking(page, usuario=usuario_global, ir_back=volver, pedido=pedido)
+
+    def ir_notificaciones_comprador():
+        show_notificaciones_comprador(page, usuario=usuario_global, ir_home=ir_home_comprador_sin_args, ir_tracking=ir_tracking)
 
     def ir_perfil():
         show_perfil(
